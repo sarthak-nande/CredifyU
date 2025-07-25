@@ -6,17 +6,17 @@ import Dashboard from "./pages/Dashboard";
 import { useEffect } from "react";
 import axios from "axios";
 import api from "./utils/api";
-import { loginSuccess } from "./redux/UserSlice";
+import { loginSuccess } from "./redux/userSlice";
 import { useDispatch } from "react-redux";
 
 function App() {
   const dispatch = useDispatch();
   useEffect(() => {
-    const res = api.post("/api/get-user" , {
+    const res = api.post("/api/get-user" , {} ,{
        withCredentials: true,
     })
    
-      dispatch(loginSuccess(res.data))
+    dispatch(loginSuccess(res.data))
     console.log(res.data)
   }, [])
   return (
