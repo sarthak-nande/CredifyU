@@ -11,8 +11,8 @@ import { useDispatch } from "react-redux";
 
 function App() {
   const dispatch = useDispatch();
-  useEffect(() => {
-    const res = api.post("/api/get-user" , {} ,{
+  useEffect(async () => {
+    const res = await api.post("/api/get-user" , {
        withCredentials: true,
     })
    
