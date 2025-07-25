@@ -2,7 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
-import { logout } from "../redux/UserSlice";
+import { logout } from "../redux/userSlice";
 
 function Dashboard() {
   const user = useSelector((state) => state.user.user);

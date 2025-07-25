@@ -3,7 +3,7 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { loginFailure, loginStart, loginSuccess } from "../redux/UserSlice";
+import { loginFailure, loginStart, loginSuccess } from "../redux/userSlice";
 import api from "../utils/api";
 
 function Login() {
