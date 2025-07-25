@@ -1,5 +1,6 @@
 import { UserModel } from "../model/user.js";
 import bcrypt from "bcrypt"
+import jwt from "jsonwebtoken"
 
 async function GenerateAccessTokenAndRefreshToken(userId) {
     try {
@@ -122,7 +123,8 @@ async function LogIn(req, res, next) {
 
         const options = {
             httpOnly: true,
-            secure: true
+            secure: true,
+            sameSite: "None"
         };
 
         return res.status(200).cookie("accessToken", accesToken, options).cookie("refreshToken", refreshToken, options).json({ user, accessToken: accesToken, refreshToken: refreshToken });
@@ -137,12 +139,12 @@ async function LogIn(req, res, next) {
 
 async function GetUser(req, res) {
     try {
-        const token = req.body?.accessToken;
+        const token = req.cookies.accessToken || req.body?.accessToken;
 
         console.log(token);
 
         if (!token) {
-            req.status(400).json({
+            res.status(400).json({
                 message: "Unauthorized User"
             })
         }
@@ -169,7 +171,6 @@ async function GetUser(req, res) {
 
 async function refreshAccessToken(req, res) {
     const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
-
 
     if (!incomingRefreshToken) {
         res.status(400).json({
@@ -206,7 +207,7 @@ async function refreshAccessToken(req, res) {
             secure: true
         }
 
-        const { accessToken, newRefreshToken } = await generateAccessTokenAndRefreshToken(user._id, User)
+        const { accessToken, newRefreshToken } = await generateAccessTokenAndRefreshToken(user._id, user)
         console.log(accessToken, newRefreshToken);
 
         return res

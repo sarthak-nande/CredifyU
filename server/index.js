@@ -14,7 +14,7 @@ const PORT = 5000
 app.use(express.json())
 app.use(cookieParser());
 app.use(cors({
-  origin: 'https://credify-u-oelj.vercel.app', // React app
+  origin: process.env.FRONTEND_URL, // React app
   credentials: true
 }));
 

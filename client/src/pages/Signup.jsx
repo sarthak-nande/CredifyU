@@ -2,6 +2,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import api from "../utils/api";
 
 function Signup() {
   const [email, setEmail] = useState("");
@@ -12,8 +13,8 @@ function Signup() {
     e.preventDefault();
 
     try {
-      const res = await axios.post(
-        "https://credify-u.vercel.app/api/signup",
+      const res = await api.post(
+        "/api/signup",
         { email, password },
         { withCredentials: true }
       );

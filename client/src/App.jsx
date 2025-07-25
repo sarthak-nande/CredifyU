@@ -3,16 +3,23 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
-import { AuthProvider, useAuth } from "./context/AuthContext";
-
-const ProtectedRoute = ({ children }) => {
-  const { authenticated } = useAuth();
-  return authenticated ? children : <Navigate to="/login" />;
-};
+import { useEffect } from "react";
+import axios from "axios";
+import api from "./utils/api";
+import { loginSuccess } from "./redux/UserSlice";
+import { useDispatch } from "react-redux";
 
 function App() {
+  const dispatch = useDispatch();
+  useEffect(() => {
+    const res = api.post("/api/get-user" , {
+       withCredentials: true,
+    })
+   
+      dispatch(loginSuccess(res.data))
+    console.log(res.data)
+  }, [])
   return (
-    <AuthProvider>
       <Router>
         <Routes>
           <Route path="/" element={<Navigate to="/login" />} />
@@ -21,14 +28,13 @@ function App() {
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute>
+              
                 <Dashboard />
-              </ProtectedRoute>
+              
             }
           />
         </Routes>
       </Router>
-    </AuthProvider>
   );
 }
 

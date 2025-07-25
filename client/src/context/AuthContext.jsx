@@ -1,19 +1,22 @@
-// src/context/AuthContext.js
-import { createContext, useContext, useState } from "react";
+import React, {useEffect, useState} from 'react'
+import {useSelector} from 'react-redux'
+import {useNavigate} from 'react-router-dom'
 
-const AuthContext = createContext();
+export default function AuthLayout({children, authentication = true}) {
 
-export const AuthProvider = ({ children }) => {
-  const [authenticated, setAuthenticated] = useState(false);
+    const navigate = useNavigate()
+    const [loader, setLoader] = useState(true)
+    const isAuthenticated = useSelector(state => state.user.isLoggedIn)
 
-  const login = () => setAuthenticated(true);
-  const logout = () => setAuthenticated(false);
+    useEffect(() => {
 
-  return (
-    <AuthContext.Provider value={{ authenticated, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
+        if(authentication && isAuthenticated !== authentication){
+            navigate("/login")
+        } else if(!authentication && isAuthenticated !== authentication){
+            navigate("/")
+        }
+        setLoader(false)
+    }, [isAuthenticated, navigate, authentication])
 
-export const useAuth = () => useContext(AuthContext);
+  return loader ? <h1>Loading...</h1> : <>{children}</>
+}

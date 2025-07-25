@@ -2,29 +2,35 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useDispatch } from "react-redux";
+import { loginFailure, loginStart, loginSuccess } from "../redux/UserSlice";
+import api from "../utils/api";
 
 function Login() {
+  const dispatch = useDispatch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const { login } = useAuth();
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const res = await axios.post(
-        "https://credify-u.vercel.app/api/login",
-        { email, password },
-        { withCredentials: true }
+      dispatch(loginStart());
+      const res = await api.post(
+        "/api/login",
+        { email, password }
       );
 
-      if (res.status === 200) {
-        login();
+      const data = await res.data;
+
+      if (res.status === 200) { 
+        dispatch(loginSuccess(data))
         navigate("/dashboard");
+      } else{
+        dispatch(loginFailure(data.message))
       }
     } catch (err) {
+      dispatch(loginFailure(err.message))
       alert(err?.response?.data?.message || "Login Failed");
     }
   };

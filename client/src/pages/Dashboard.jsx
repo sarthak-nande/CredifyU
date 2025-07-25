@@ -1,16 +1,17 @@
 // src/pages/Dashboard.jsx
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useAuth } from "../context/AuthContext";
+import { useSelector, useDispatch } from "react-redux";
+import { logout } from "../redux/UserSlice";
 
 function Dashboard() {
+  const user = useSelector((state) => state.user.user);
+  const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
   const navigate = useNavigate();
-  const { logout } = useAuth();
-
+  const dispatch = useDispatch();
   const handleLogout = async () => {
     try {
-      await axios.post("https://credify-u.vercel.app/api/logout", {}, { withCredentials: true });
-      logout();
+      dispatch(logout())
       navigate("/login");
     } catch (err) {
       alert("Logout failed");
@@ -19,8 +20,8 @@ function Dashboard() {
 
   return (
     <div>
-      <h2>Welcome to Dashboard</h2>
-      <button onClick={handleLogout}>Logout</button>
+      {isLoggedIn ? <div><h2>Welcome to Dashboard</h2>
+      <button onClick={handleLogout}>Logout</button></div> : <p>Please log in.</p> }
     </div>
   );
 }
