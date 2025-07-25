@@ -13,7 +13,7 @@ function Signup() {
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/signup",
+        "https://credify-u.vercel.app/api/signup",
         { email, password },
         { withCredentials: true }
       );

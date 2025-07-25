@@ -9,7 +9,7 @@ function Dashboard() {
 
   const handleLogout = async () => {
     try {
-      await axios.post("http://localhost:5000/api/logout", {}, { withCredentials: true });
+      await axios.post("https://credify-u.vercel.app/api/logout", {}, { withCredentials: true });
       logout();
       navigate("/login");
     } catch (err) {
