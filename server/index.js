@@ -2,7 +2,6 @@ import express from 'express'
 import cors from 'cors'
 import env from "dotenv"
 import cookieParser from 'cookie-parser';
-import { v4 as uuidv4 } from 'uuid'
 import connection from "./db/connection.js"
 import UserRoutes from "./routes/UserRoutes.js"
 
