@@ -1,31 +1,30 @@
 import express from 'express'
 import cors from 'cors'
-import dotenv from 'dotenv'
-import cookieParser from 'cookie-parser'
+import env from "dotenv"
+import cookieParser from 'cookie-parser';
 import { v4 as uuidv4 } from 'uuid'
-import connection from './db/connection.js'
-import UserRoutes from './routes/UserRoutes.js'
-import serverless from 'serverless-http'
+import connection from "./db/connection.js"
+import UserRoutes from "./routes/UserRoutes.js"
 
-dotenv.config()
-connection()
+env.config();
+connection();
 
 const app = express()
+const PORT = 5000
 
 app.use(express.json())
-app.use(cookieParser())
-app.use(
-  cors({
-    origin: 'http://localhost:5173', // change to your frontend URL on prod
-    credentials: true,
-  })
-)
+app.use(cookieParser());
+app.use(cors({
+  origin: 'http://localhost:5173', // React app
+  credentials: true
+}));
 
-app.use('/api', UserRoutes)
+app.use('/api', UserRoutes);
 
-app.get('/', (req, res) => {
-  res.status(200).json({ message: 'server is running' })
+app.get("/" , async(req, res) => {{
+  res.status(200).json({"message" : "server is runnig"});
+}})
+
+app.listen(PORT, () => {
+  console.log(`✅ Mock Verifier backend running at: http://localhost:${PORT}`)
 })
-
-export const handler = serverless(app)
-export default handler
