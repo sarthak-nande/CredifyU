@@ -1,7 +1,9 @@
 // vite.config.js
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react'; // or vue, svelte, etc.
+import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import tailwindcss from '@tailwindcss/vite';
+import path from 'path';
 
 export default defineConfig({
   plugins: [
@@ -37,6 +39,12 @@ export default defineConfig({
           }
         ]
       }
-    })
-  ]
+    }),
+    tailwindcss()
+  ],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src')
+    }
+  }
 });

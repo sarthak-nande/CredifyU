@@ -2,14 +2,16 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { loginFailure, loginStart, loginSuccess } from "../redux/userSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { loginFailure, loginStart, loginSuccess, setProfileComplete } from "../redux/userSlice";
 import api from "../utils/api";
+import { toast } from "sonner";
 
 function Login() {
   const dispatch = useDispatch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
   const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,7 +27,16 @@ function Login() {
 
       if (res.status === 200) { 
         dispatch(loginSuccess(data))
-        navigate("/dashboard");
+        dispatch(setProfileComplete(data.user.isProfileComplete));
+        toast("Login successful!" , {
+          duration: 3000,
+          position: "top-right",
+          style: {
+            background: "black",
+            color: "white",
+          },
+        });
+        navigate("/college/dashboard");
       } else{
         dispatch(loginFailure(data.message))
       }

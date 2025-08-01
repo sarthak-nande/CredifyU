@@ -4,6 +4,7 @@ import env from "dotenv"
 import cookieParser from 'cookie-parser';
 import connection from "./db/connection.js"
 import UserRoutes from "./routes/UserRoutes.js"
+import StudentRoutes from "./routes/StudentRoutes.js"
 
 env.config();
 connection();
@@ -19,10 +20,11 @@ app.use(cors({
 }));
 
 app.use('/api', UserRoutes);
+app.use('/api', StudentRoutes);
 
-app.get("/" , async(req, res) => {{
-  res.status(200).json({"message" : "server is runnig"});
-}})
+app.get("/" , async(req, res) => {
+  res.status(200).json({"message" : "server is running"});
+})
 
 app.listen(PORT, () => {
   console.log(`✅ Mock Verifier backend running at: http://localhost:${PORT}`)

@@ -1,40 +1,51 @@
 // src/App.js
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Navigate,
+  Outlet,
+} from "react-router-dom";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
-import { useEffect } from "react";
-import axios from "axios";
-import api from "./utils/api";
-import { loginSuccess } from "./redux/userSlice";
+import AddStudent from "./component/AddStudent";
+import TableDemo from "./component/StudentTable";
+import AuthLayout from "./context/AuthContext";
 import { useDispatch } from "react-redux";
+import { useEffect } from "react";
+import api from "./utils/api";
+import { loginFailure, loginStart, loginSuccess, setProfileComplete } from "./redux/userSlice";
+
 
 function App() {
   const dispatch = useDispatch();
-  useEffect(async () => {
-    const res = await api.post("/api/get-user" , {
-       withCredentials: true,
-    })
-   
-    dispatch(loginSuccess(res.data))
-    console.log(res.data)
-  }, [])
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const res = await api.post("/api/get-user", { withCredentials: true });
+
+        if (res.status !== 200) {
+          throw new Error("User not logged in");
+        }else{
+          dispatch(loginSuccess(res.data));
+          dispatch(setProfileComplete(res.data.user.isProfileComplete));
+        }
+        
+      } catch (err) {
+        dispatch(loginFailure("User not logged in"));
+        console.error("User not logged in");
+      }
+    }
+    fetchData();
+  }, [dispatch]);
+
   return (
-      <Router>
-        <Routes>
-          <Route path="/" element={<Navigate to="/login" />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
-          <Route
-            path="/dashboard"
-            element={
-              
-                <Dashboard />
-              
-            }
-          />
-        </Routes>
-      </Router>
+    <>
+      <main>
+        <Outlet />
+      </main>
+    </>
   );
 }
 

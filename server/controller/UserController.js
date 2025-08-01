@@ -1,6 +1,10 @@
 import { UserModel } from "../model/user.js";
 import bcrypt from "bcrypt"
+import { generateKey } from "crypto";
 import jwt from "jsonwebtoken"
+import { generateKeys } from "../middleware/keysGenaratator.js";
+import keys from "../model/keys.js";
+import { encryptText } from "../middleware/crpytoGenarator.js";
 
 async function GenerateAccessTokenAndRefreshToken(userId) {
     try {
@@ -19,7 +23,7 @@ async function GenerateAccessTokenAndRefreshToken(userId) {
 
 async function SignUp(req, res) {
     try {
-        const { email, password } = req.body;
+        const { email, password, Name, CollegeName, phone, CollegeAddress } = req.body;
 
         if (!email || !password) {
             return res.status(400).json({ message: "Email and Password is required!" })
@@ -28,8 +32,6 @@ async function SignUp(req, res) {
         const isEmailAlreadyPresent = await UserModel.findOne({
             email : email
         });
-
-        console.log(isEmailAlreadyPresent)
 
         if (isEmailAlreadyPresent) {
             return res.status(400).json({
@@ -62,6 +64,29 @@ async function SignUp(req, res) {
                 const refreshToken = getCreatedUser.getRefreshToken();
 
                 getCreatedUser.refreshToken = refreshToken;
+
+                const {publicKey, privateKey} = await generateKeys();
+
+                if(!publicKey || !privateKey) {
+                    return res.status(500).json({ message: "Error Generating Keys" });
+                }
+
+                const {iv , data} = await encryptText(privateKey);
+
+                if (!iv || !data) {
+                    return res.status(500).json({ message: "Error Encrypting Keys" });
+                }
+
+                const createdKeys = await keys.create({
+                    publicKey: publicKey,
+                    privateKey: data,
+                    privateKeyIv: iv,
+                    collegeId: getCreatedUser._id
+                });
+
+                if (!createdKeys) {
+                    return res.status(500).json({ message: "Error Saving Keys" });
+                }
 
                 await getCreatedUser.save();
 
@@ -169,7 +194,7 @@ async function GetUser(req, res) {
     }
 }
 
-async function refreshAccessToken(req, res) {
+async function RefreshAccessToken(req, res) {
     const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
 
     if (!incomingRefreshToken) {
@@ -224,4 +249,57 @@ async function refreshAccessToken(req, res) {
 
 }
 
-export { SignUp, LogIn, GetUser, refreshAccessToken }
+async function SaveUserDetails(req, res) {
+    try {
+        const { Name, collegeName, phone, collegeAddress } = req.body;
+        const accessToken = req.cookies.accessToken || req.body?.accessToken;
+
+        if (!accessToken) {
+            return res.status(400).json({
+                message: "Unauthorized User"
+            });
+        }
+
+        const decodedToken = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+
+        if (!decodedToken) {
+            return res.status(400).json({
+                message: "Invalid Access Token"
+            });
+        }
+
+        const userId = decodedToken._id;
+
+        if (!userId) {
+            return res.status(400).json({
+                message: "User ID not found in token"
+            });
+        }
+
+        const updatedUser = await UserModel.findByIdAndUpdate(userId, {
+            Name,
+            collegeName,
+            phone,
+            collegeAddress,
+            isProfileComplete: true
+        }, { new: true });
+
+        if (!updatedUser) {
+            return res.status(400).json({
+                message: "Error updating user details"
+            });
+        }
+
+        return res.status(200).json({
+            message: "User details updated successfully",
+            user: updatedUser
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message: "Internal Server Error"
+        });
+    }
+}
+
+export { SignUp, LogIn, GetUser, RefreshAccessToken, SaveUserDetails };
