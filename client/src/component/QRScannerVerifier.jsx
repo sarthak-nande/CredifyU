@@ -13,7 +13,7 @@ const QRScannerVerifier = () => {
   useEffect(() => {
     async function fetchPublicKey() {
       try {
-        const response = await api.get('/api/get-public-key',{collegeId : "6889e7b5174eae4686ab9cf0"} , { withCredentials: true });
+        const response = await api.post('/api//get-publickey',{collegeId : "6889e7b5174eae4686ab9cf0"} , { withCredentials: true });
         if (response.status === 200) {
           setPublicKeyPem(response.data.publicKey);
         } else {
