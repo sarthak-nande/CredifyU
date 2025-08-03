@@ -1,86 +1,68 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Html5Qrcode } from 'html5-qrcode';
-import { jwtVerify, importSPKI } from 'jose';
-import api from '@/utils/api';
+import { useEffect, useRef, useState } from "react"
+import { Html5Qrcode } from "html5-qrcode"
+import { jwtVerify, importSPKI } from "jose"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { QrCode, CheckCircle, RotateCcw, ArrowRight, User, Mail, Phone, Calendar, GraduationCap, AlertCircle, Camera } from 'lucide-react'
+import api from "@/utils/api"
 
-import {
-  QrCode,
-  AlertCircle,
-  CheckCircle,
-  Camera,
-  RotateCcw,
-  StopCircle,
-  PlayCircle,
-  Scan,
-  Mail,
-  Phone,
-  Calendar,
-  GraduationCap,
-  User,
-  Shield,
-  Sparkles,
-  Zap,
-  Activity,
-  Wifi,
-  Lock
-} from 'lucide-react';
-
-const QRScannerVerifier = () => {
+export default function JWTQRScanner() {
   const qrRef = useRef(null);
-  const [payload, setPayload] = useState(null);
-  const [error, setError] = useState('');
-  const [publicKeyPem, setPublicKeyPem] = useState('');
-  const [isScanning, setIsScanning] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const html5QrCodeRef = useRef(null);
   const mountedRef = useRef(true);
-  const scannerReadyRef = useRef(false);
-  const [scanCount, setScanCount] = useState(0);
-  const [connectionStatus, setConnectionStatus] = useState('connecting');
+  const scannerIdRef = useRef(`qr-reader-${Date.now()}`);
 
-  // Utility function to format dates
-  const formatDate = (timestamp) => {
-    if (!timestamp) return 'N/A';
-    const date = new Date(timestamp * 1000);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+  const [isScanning, setIsScanning] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
+  const [payload, setPayload] = useState(null);
+  const [error, setError] = useState("");
+  const [publicKeyPem, setPublicKeyPem] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Mock API function to get the public key
+
+  // Cleanup scanner function
+  const cleanupScanner = async () => {
+    if (html5QrCodeRef.current) {
+      try {
+        await html5QrCodeRef.current.stop();
+        await html5QrCodeRef.current.clear();
+      } catch (error) {
+        console.warn("Scanner cleanup error (can be ignored):", error);
+      } finally {
+        html5QrCodeRef.current = null;
+        setIsScanning(false);
+      }
+    }
   };
 
+  // Main Effect for component mount/unmount and public key fetch
   useEffect(() => {
     mountedRef.current = true;
+
     async function fetchPublicKey() {
       try {
         setIsLoading(true);
-        setConnectionStatus('connecting');
-        const response = await api.post(
-          '/api/get-publickey',
-          { collegeId: '6889e7b5174eae4686ab9cf0' },
-          { withCredentials: true }
-        );
-        if (response.status === 200) {
-          const raw = response.data.publicKey;
-          const fixedPem = raw.replace(/\\n/g, '\n');
-          if (mountedRef.current) {
+        const response = await api.post("/api/get-publickey", { collegeId: "6889e7b5174eae4686ab9cf0" }, { withCredentials: true });
+        if (mountedRef.current) {
+          if (response.status === 200) {
+            const fixedPem = response.data.publicKey.replace(/\\n/g, "\n");
             setPublicKeyPem(fixedPem);
-            setConnectionStatus('connected');
-            setIsLoading(false);
-          }
-        } else {
-          if (mountedRef.current) {
-            setError('Failed to fetch public key');
-            setConnectionStatus('error');
-            setIsLoading(false);
+            setError("");
+          } else {
+            setError("Failed to fetch public key");
           }
         }
-      } catch (err) {
+      } catch (error) {
+        console.error("Error fetching public key:", error);
         if (mountedRef.current) {
-          setError('Error fetching public key');
-          setConnectionStatus('error');
+          setError("Error fetching public key");
+        }
+      } finally {
+        if (mountedRef.current) {
           setIsLoading(false);
         }
       }
@@ -90,120 +72,191 @@ const QRScannerVerifier = () => {
 
     return () => {
       mountedRef.current = false;
+      cleanupScanner();
     };
   }, []);
 
+  // Effect to manage scanner start/stop
+  useEffect(() => {
+    if (isScanning && !html5QrCodeRef.current && qrRef.current && publicKeyPem) {
+      const qrCode = new Html5Qrcode(qrRef.current.id);
+      html5QrCodeRef.current = qrCode;
+
+      const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+      const onScanSuccess = (decodedText, decodedResult) => {
+        if (mountedRef.current && decodedText) {
+          cleanupScanner();
+          verifyToken(decodedText);
+        }
+      };
+      const onScanError = (errorMessage) => {
+        // console.warn(errorMessage);
+      };
+
+      qrCode.start({ facingMode: "environment" }, config, onScanSuccess, onScanError)
+        .catch(err => {
+          console.error("Failed to start scanner:", err);
+          if (mountedRef.current) {
+            setError("Could not access camera. Please check permissions.");
+            setIsScanning(false);
+          }
+        });
+    }
+    // Cleanup function within this effect to handle stop logic
+    return () => {
+      if (!isScanning) {
+        cleanupScanner();
+      }
+    };
+  }, [isScanning, publicKeyPem]);
+
   const verifyToken = async (token) => {
     try {
-      if (!publicKeyPem) throw new Error('Public key not loaded yet');
+      if (!publicKeyPem) throw new Error("Public key not loaded yet");
+      
+      const publicKey = await importSPKI(publicKeyPem, "ES256");
 
-      const publicKey = await importSPKI(publicKeyPem, 'ES256');
-
-      const { payload } = await jwtVerify(token, publicKey, {
-        issuer: '6889e7b5174eae4686ab9cf0',
-        audience: '6889e7b5174eae4686ab9cf0',
+      const { payload: verifiedPayload } = await jwtVerify(token, publicKey, {
+        issuer: "6889e7b5174eae4686ab9cf0",
+        audience: "6889e7b5174eae4686ab9cf0",
       });
 
       if (mountedRef.current) {
-        setPayload(payload);
-        setError('');
-        setScanCount(prev => prev + 1);
+        setPayload(verifiedPayload);
+        setIsVerified(true);
+        setError("");
       }
     } catch (err) {
+      console.error("Verification failed:", err);
       if (mountedRef.current) {
-        setError('Invalid or tampered token');
+        setError("Invalid or tampered token");
       }
     }
   };
 
-  const startScanning = async () => {
-    if (!qrRef.current || !publicKeyPem || isScanning) return;
-
-    await stopScanning();
-
-    if (!mountedRef.current) return;
-
+  const handleRescan = () => {
+    setIsVerified(false);
     setPayload(null);
-    setError('');
+    setError("");
+    cleanupScanner();
     setIsScanning(true);
-
-    try {
-      const html5QrCode = new Html5Qrcode('qr-reader');
-      html5QrCodeRef.current = html5QrCode;
-
-      await html5QrCode.start(
-        { facingMode: 'environment' },
-        { fps: 10, qrbox: 250 },
-        (decodedText) => {
-          if (mountedRef.current) {
-            stopScanning();
-            verifyToken(decodedText);
-          }
-        },
-        () => {}
-      );
-      scannerReadyRef.current = true;
-    } catch (err) {
-      if (mountedRef.current) {
-        setError('Could not access camera. Please check permissions.');
-        setIsScanning(false);
-      }
-    }
   };
 
-  const stopScanning = async () => {
-    if (html5QrCodeRef.current) {
-      try {
-        const scanner = html5QrCodeRef.current;
-        html5QrCodeRef.current = null;
-        scannerReadyRef.current = false;
-        await scanner.stop();
-        setTimeout(async () => {
-          try {
-            await scanner.clear();
-          } catch (error) {
-            console.log('Scanner clear error (can be ignored):', error);
-          }
-        }, 100);
-      } catch (error) {
-        console.log('Scanner stop error (can be ignored):', error);
-      }
-    }
-    if (mountedRef.current) {
-      setIsScanning(false);
-    }
+  const handleMoveForward = () => {
+    console.log("Moving forward with verified student:", payload);
+    // Add your move forward logic here
   };
 
-  const handleRescan = async () => {
-    await stopScanning();
-    setPayload(null);
-    setError('');
-    setTimeout(() => {
-      if (mountedRef.current) {
-        startScanning();
-      }
-    }, 200);
+  const mockScan = () => {
+    cleanupScanner();
+    verifyToken(mockJWT);
   };
 
-  useEffect(() => {
-    if (publicKeyPem && !isLoading) {
-      startScanning();
-    }
-    return () => {
-      stopScanning();
-    };
-  }, [publicKeyPem, isLoading]);
+  const formatDate = (timestamp) => {
+    return new Date(timestamp * 1000).toLocaleDateString();
+  };
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-2xl p-8 text-center space-y-4">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500 mx-auto"></div>
-          <h3 className="text-white text-xl font-semibold">Initializing Scanner</h3>
-          <p className="text-purple-200">Connecting to verification server...</p>
-          <div className="flex items-center justify-center gap-2 text-sm text-purple-300">
-            <Wifi className="h-4 w-4 animate-pulse" />
-            <span>Establishing secure connection</span>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading public key...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (isVerified) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 p-4 flex flex-col items-center justify-center">
+        <div className="w-full max-w-2xl mx-auto space-y-6">
+          <Card className="border-green-200 bg-green-50 text-center">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-center gap-2 text-green-700">
+                <CheckCircle className="h-6 w-6" />
+                <span className="text-lg font-semibold">✅ Verified JWT</span>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+              <CardTitle className="flex items-center gap-2 text-xl">
+                <GraduationCap className="h-6 w-6" />
+                Student Identity Card
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                <div className="text-center">
+                  <h2 className="text-2xl font-bold text-gray-800">{payload?.name}</h2>
+                  <Badge variant="secondary" className="mt-1">
+                    {payload?.branch} - {payload?.year}
+                  </Badge>
+                </div>
+                <Separator />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center gap-3">
+                    <User className="h-5 w-5 text-blue-600" />
+                    <div>
+                      <p className="text-sm text-gray-500">Full Name</p>
+                      <p className="font-medium">{payload?.name}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Mail className="h-5 w-5 text-blue-600" />
+                    <div>
+                      <p className="text-sm text-gray-500">Email</p>
+                      <p className="font-medium text-sm">{payload?.email}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Phone className="h-5 w-5 text-blue-600" />
+                    <div>
+                      <p className="text-sm text-gray-500">Mobile</p>
+                      <p className="font-medium">{payload?.mobile}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Calendar className="h-5 w-5 text-blue-600" />
+                    <div>
+                      <p className="text-sm text-gray-500">Academic Year</p>
+                      <p className="font-medium">{payload?.year}</p>
+                    </div>
+                  </div>
+                </div>
+                <Separator />
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-gray-700 mb-2">JWT Information</h3>
+                  <div className="grid grid-cols-1 gap-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Issuer:</span>
+                      <span className="font-mono text-xs">{payload?.iss}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Audience:</span>
+                      <span className="font-mono text-xs">{payload?.aud}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Issued At:</span>
+                      <span>{payload ? formatDate(payload.iat) : "N/A"}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <div className="flex gap-4">
+            <Button variant="outline" onClick={handleRescan} className="flex-1 bg-transparent">
+              <RotateCcw className="h-4 w-4 mr-2" />
+              Rescan
+            </Button>
+            <Button onClick={handleMoveForward} className="flex-1">
+              Move Forward
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
           </div>
         </div>
       </div>
@@ -211,285 +264,66 @@ const QRScannerVerifier = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4">
-      {/* Animated background elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-4 -right-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-8 -left-4 w-72 h-72 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-2000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-4000"></div>
-      </div>
-
-      <div className="relative z-10 flex items-center justify-center min-h-screen">
-        <div className="w-full max-w-lg mx-auto">
-          {/* Header Card */}
-          
-
-          {/* Error Alert */}
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="flex items-center justify-center gap-2 text-2xl">
+            <QrCode className="h-6 w-6" />
+            Scan JWT QR Code
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="text-center space-y-6">
           {error && (
-            <div className="backdrop-blur-lg bg-red-500/20 border border-red-500/50 rounded-2xl p-4 mb-6">
-              <div className="flex items-center gap-3">
-                <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0" />
-                <div>
-                  <h3 className="text-red-300 font-semibold">Verification Failed</h3>
-                  <p className="text-red-200 text-sm">{error}</p>
-                </div>
-              </div>
-            </div>
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
           )}
-
-          {/* Scanner Card */}
-          {!payload && (
-            <div className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-2xl p-6 mb-6 shadow-2xl">
-              <div className="relative aspect-square max-w-sm mx-auto rounded-2xl overflow-hidden border-2 border-purple-400/30">
-                <div id="qr-reader" ref={qrRef} className="h-full w-full rounded-2xl" />
-                
+          <div className="flex justify-center">
+            <div className="relative w-80 h-80">
+              <div
+                ref={qrRef}
+                id={scannerIdRef.current}
+                className={`w-full h-full border-2 border-dashed border-gray-300 rounded-lg overflow-hidden ${
+                  !isScanning ? "flex items-center justify-center bg-gray-50" : ""
+                }`}
+              >
                 {!isScanning && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm text-center p-6">
-                    <div className="animate-bounce mb-4">
-                      <Camera className="h-16 w-16 text-purple-400" />
-                    </div>
-                    <p className="text-white font-medium mb-2">
-                      Point camera at QR code
-                    </p>
-                    <div className="px-3 py-1 bg-purple-500/30 rounded-full text-xs text-purple-200 mb-2">
-                      {publicKeyPem ? 'Ready to scan' : 'Loading security keys...'}
-                    </div>
-                    <div className="flex items-center gap-1 text-xs text-gray-300">
-                      <Lock className="h-3 w-3" />
-                      <span>End-to-end encrypted</span>
-                    </div>
-                  </div>
-                )}
-                
-                {isScanning && (
-                  <div className="absolute top-4 left-4 right-4 z-10">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 bg-green-500/90 backdrop-blur-sm px-3 py-1 rounded-full">
-                        <Scan className="h-4 w-4 text-white animate-pulse" />
-                        <span className="text-white text-sm font-medium">Scanning</span>
-                      </div>
-                      <div className="bg-black/30 backdrop-blur-sm px-3 py-1 rounded-full">
-                        <span className="text-white text-xs flex items-center gap-1">
-                          <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                          Live
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Scanning overlay with corner indicators */}
-                {isScanning && (
-                  <div className="absolute inset-0 pointer-events-none">
-                    <div className="absolute inset-4 border-2 border-purple-400 rounded-2xl">
-                      <div className="absolute top-0 left-0 w-6 h-6 border-l-4 border-t-4 border-white rounded-tl-lg"></div>
-                      <div className="absolute top-0 right-0 w-6 h-6 border-r-4 border-t-4 border-white rounded-tr-lg"></div>
-                      <div className="absolute bottom-0 left-0 w-6 h-6 border-l-4 border-b-4 border-white rounded-bl-lg"></div>
-                      <div className="absolute bottom-0 right-0 w-6 h-6 border-r-4 border-b-4 border-white rounded-br-lg"></div>
-                    </div>
-                    <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white text-sm bg-black/50 px-3 py-1 rounded-full">
-                      Align QR code within frame
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Control Buttons */}
-              <div className="grid grid-cols-3 gap-3 mt-6">
-                <button
-                  onClick={startScanning}
-                  disabled={isScanning || !publicKeyPem}
-                  className="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-600 disabled:opacity-50 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100"
-                >
-                  <PlayCircle className="h-4 w-4" />
-                  <span className="hidden sm:inline">Start</span>
-                </button>
-
-                <button
-                  onClick={stopScanning}
-                  disabled={!isScanning}
-                  className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 disabled:bg-gray-600 disabled:opacity-50 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100"
-                >
-                  <StopCircle className="h-4 w-4" />
-                  <span className="hidden sm:inline">Stop</span>
-                </button>
-
-                <button
-                  onClick={handleRescan}
-                  disabled={isScanning}
-                  className="flex items-center justify-center gap-2 bg-purple-500 hover:bg-purple-600 disabled:bg-gray-600 disabled:opacity-50 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 disabled:hover:scale-100"
-                >
-                  <RotateCcw className="h-4 w-4" />
-                  <span className="hidden sm:inline">Rescan</span>
-                </button>
-              </div>
-
-              {/* Status info */}
-              <div className="mt-4 text-center text-sm text-purple-200">
-                <p className="flex items-center justify-center gap-2">
-                  <Shield className="h-4 w-4" />
-                  JWT verification with ES256 encryption
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Success and Student Card */}
-          {payload && (
-            <div className="space-y-6">
-              {/* Success Alert */}
-              <div className="backdrop-blur-lg bg-green-500/20 border border-green-500/50 rounded-2xl p-6">
-                <div className="text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-green-500 rounded-full mb-4 animate-bounce">
-                    <CheckCircle className="h-8 w-8 text-white" />
-                  </div>
-                  <h3 className="text-green-300 text-xl font-bold mb-2">
-                    ✅ JWT Verified Successfully!
-                  </h3>
-                  <p className="text-green-200">
-                    Token integrity confirmed and student authenticated
-                  </p>
-                </div>
-              </div>
-
-              {/* Student Identity Card */}
-              <div className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-2xl overflow-hidden shadow-2xl">
-                {/* Card Header */}
-                <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 p-6 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-black/20"></div>
-                  <div className="relative z-10">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-white/20 rounded-lg">
-                          <GraduationCap className="h-6 w-6 text-white" />
-                        </div>
-                        <div>
-                          <h2 className="text-white text-xl font-bold">Student ID Card</h2>
-                          <p className="text-blue-100 text-sm">Digital Identity Verification</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <Sparkles className="h-6 w-6 text-yellow-300 animate-pulse" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Card Content */}
-                <div className="p-6 space-y-6">
-                  {/* Student Name */}
                   <div className="text-center">
-                    <h3 className="text-white text-2xl font-bold mb-2">{payload?.name}</h3>
-                    <div className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500/30 to-cyan-500/30 px-4 py-2 rounded-full">
-                      <span className="text-purple-200 font-medium">{payload?.branch}</span>
-                      <span className="text-purple-300">•</span>
-                      <span className="text-cyan-200 font-medium">{payload?.year}</span>
-                    </div>
+                    <Camera className="h-16 w-16 text-gray-400 mx-auto mb-2" />
+                    <p className="text-sm text-gray-500">Camera will appear here</p>
                   </div>
-
-                  <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
-
-                  {/* Student Details Grid */}
-                  <div className="grid grid-cols-1 gap-4">
-                    <div className="flex items-center gap-4 p-3 bg-white/5 rounded-xl">
-                      <div className="p-2 bg-blue-500/20 rounded-lg">
-                        <User className="h-5 w-5 text-blue-400" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-gray-400 text-sm">Full Name</p>
-                        <p className="text-white font-medium">{payload?.name}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-4 p-3 bg-white/5 rounded-xl">
-                      <div className="p-2 bg-green-500/20 rounded-lg">
-                        <Mail className="h-5 w-5 text-green-400" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-gray-400 text-sm">Email Address</p>
-                        <p className="text-white font-medium text-sm">{payload?.email}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-4 p-3 bg-white/5 rounded-xl">
-                      <div className="p-2 bg-purple-500/20 rounded-lg">
-                        <Phone className="h-5 w-5 text-purple-400" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-gray-400 text-sm">Mobile Number</p>
-                        <p className="text-white font-medium">{payload?.mobile}</p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="flex items-center gap-4 p-3 bg-white/5 rounded-xl">
-                        <div className="p-2 bg-orange-500/20 rounded-lg">
-                          <Calendar className="h-5 w-5 text-orange-400" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-gray-400 text-xs">Academic Year</p>
-                          <p className="text-white font-medium text-sm">{payload?.year}</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-4 p-3 bg-white/5 rounded-xl">
-                        <div className="p-2 bg-cyan-500/20 rounded-lg">
-                          <GraduationCap className="h-5 w-5 text-cyan-400" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-gray-400 text-xs">Branch</p>
-                          <p className="text-white font-medium text-sm">{payload?.branch}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
-
-                  {/* JWT Metadata */}
-                  <div className="bg-black/20 backdrop-blur-sm p-4 rounded-xl">
-                    <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
-                      <Shield className="h-4 w-4 text-purple-400" />
-                      JWT Security Information
-                    </h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-400">Issuer:</span>
-                        <span className="text-purple-300 font-mono text-xs bg-purple-500/20 px-2 py-1 rounded">
-                          {payload?.iss}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-400">Audience:</span>
-                        <span className="text-cyan-300 font-mono text-xs bg-cyan-500/20 px-2 py-1 rounded">
-                          {payload?.aud}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-400">Issued:</span>
-                        <span className="text-green-300 text-xs bg-green-500/20 px-2 py-1 rounded">
-                          {formatDate(payload?.iat)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Rescan Button */}
-                  <button
-                    onClick={handleRescan}
-                    className="w-full bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 transform hover:scale-105 flex items-center justify-center gap-2"
-                  >
-                    <RotateCcw className="h-4 w-4" />
-                    Scan Another QR Code
-                  </button>
-                </div>
+                )}
               </div>
+              {isScanning && (
+                <Badge className="absolute top-2 left-2 bg-green-500 text-white px-2 py-1">
+                  Scanning...
+                </Badge>
+              )}
             </div>
-          )}
-        </div>
-      </div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Button
+              onClick={() => setIsScanning(true)}
+              disabled={isScanning || !publicKeyPem}
+              className="w-full"
+              size="lg"
+            >
+              {isScanning ? "Scanning..." : "Start Scan"}
+            </Button>
+            {isScanning && (
+              <Button onClick={() => setIsScanning(false)} variant="outline" className="w-full" size="lg">
+                Stop Scan
+              </Button>
+            )}
+            <Button onClick={handleRescan} variant="secondary" className="w-full" size="lg">
+              <RotateCcw className="h-4 w-4 mr-2" />
+              Rescan
+            </Button>
+          </div>
+          
+        </CardContent>
+      </Card>
     </div>
   );
-};
-
-export default QRScannerVerifier;
+}
