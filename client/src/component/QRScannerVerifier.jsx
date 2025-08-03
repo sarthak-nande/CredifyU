@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { QrCode, CheckCircle, RotateCcw, ArrowRight, User, Mail, Phone, Calendar, GraduationCap, AlertCircle, Camera, Upload } from 'lucide-react'
+import api from "@/utils/api"
 
 export default function JWTQRScanner() {
   const videoRef = useRef(null)
@@ -12,48 +13,44 @@ export default function JWTQRScanner() {
   const streamRef = useRef(null)
   const mountedRef = useRef(true)
   const fileInputRef = useRef(null)
+  const scanIntervalRef = useRef(null)
   
   const [isScanning, setIsScanning] = useState(false)
   const [isVerified, setIsVerified] = useState(false)
   const [payload, setPayload] = useState(null)
   const [error, setError] = useState("")
+  const [publicKeyPem, setPublicKeyPem] = useState("")
   const [isLoading, setIsLoading] = useState(true)
   const [scannerState, setScannerState] = useState("NOT_STARTED")
 
-  // Mock API function
-  const mockApi = {
-    post: async (url, data, config) => {
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      const mockPublicKey = `-----BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEYWnm/eplO9BFtXaUr+uBiQXd1/xO
-VGg5YOQqKXgL2gFRyO5vNFXWv5sZnrNy7dfn2LO1eJpQmVdtgEOqE1rNxw==
------END PUBLIC KEY-----`
-      
-      return {
-        status: 200,
-        data: { publicKey: mockPublicKey }
-      }
-    }
-  }
-
-  // Mock public key fetch
+  // Fetch the public key when component mounts
   useEffect(() => {
     async function fetchPublicKey() {
       try {
         setIsLoading(true)
-        const response = await mockApi.post(
+        const response = await api.post(
           "/api/get-publickey",
           { collegeId: "6889e7b5174eae4686ab9cf0" },
           { withCredentials: true }
         )
-        if (response.status === 200 && mountedRef.current) {
-          setError("")
+        
+        if (response.status === 200) {
+          const raw = response.data.publicKey
+          const fixedPem = raw.replace(/\\n/g, "\n")
+          if (mountedRef.current) {
+            setPublicKeyPem(fixedPem)
+            setError("")
+          }
+        } else {
+          console.error("Failed to fetch public key")
+          if (mountedRef.current) {
+            setError("Failed to fetch public key")
+          }
         }
       } catch (error) {
         console.error("Error fetching public key:", error)
         if (mountedRef.current) {
-          setError("Error fetching public key")
+          setError("Error fetching public key: " + error.message)
         }
       } finally {
         if (mountedRef.current) {
@@ -70,30 +67,83 @@ VGg5YOQqKXgL2gFRyO5vNFXWv5sZnrNy7dfn2LO1eJpQmVdtgEOqE1rNxw==
     return () => {
       mountedRef.current = false
       stopCamera()
+      if (scanIntervalRef.current) {
+        clearInterval(scanIntervalRef.current)
+      }
     }
   }, [])
 
-  // Mock JWT verification (since we can't use jose library)
+  // Base64 to Uint8Array conversion
+  const base64ToUint8Array = (base64) => {
+    const binaryString = atob(base64)
+    const bytes = new Uint8Array(binaryString.length)
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i)
+    }
+    return bytes
+  }
+
+  // JWT verification using Web Crypto API
   const verifyToken = async (token) => {
     try {
-      // Simulate verification delay
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      // Mock payload - in real app this would come from JWT verification
-      const mockPayload = {
-        name: "Alice Johnson",
-        email: "alice.johnson@university.edu",
-        mobile: "+1-555-0123",
-        branch: "Computer Science Engineering",
-        year: "Third Year",
-        studentId: "CSE2021045",
-        iss: "6889e7b5174eae4686ab9cf0",
-        aud: "6889e7b5174eae4686ab9cf0",
-        iat: Math.floor(Date.now() / 1000) - 86400 // Yesterday
+      if (!publicKeyPem) {
+        throw new Error("Public key not loaded yet")
       }
-      
+
+      // Parse JWT
+      const parts = token.split('.')
+      if (parts.length !== 3) {
+        throw new Error("Invalid JWT format")
+      }
+
+      const [headerB64, payloadB64, signatureB64] = parts
+
+      // Decode header and payload
+      const header = JSON.parse(atob(headerB64.replace(/-/g, '+').replace(/_/g, '/')))
+      const payload = JSON.parse(atob(payloadB64.replace(/-/g, '+').replace(/_/g, '/')))
+
+      // Convert PEM to CryptoKey
+      const pemHeader = "-----BEGIN PUBLIC KEY-----"
+      const pemFooter = "-----END PUBLIC KEY-----"
+      const pemContents = publicKeyPem.replace(pemHeader, "").replace(pemFooter, "").replace(/\s/g, "")
+      const keyData = base64ToUint8Array(pemContents)
+
+      const publicKey = await crypto.subtle.importKey(
+        "spki",
+        keyData,
+        {
+          name: "ECDSA",
+          namedCurve: "P-256"
+        },
+        false,
+        ["verify"]
+      )
+
+      // Verify signature
+      const signatureBytes = base64ToUint8Array(signatureB64.replace(/-/g, '+').replace(/_/g, '/'))
+      const dataToVerify = new TextEncoder().encode(`${headerB64}.${payloadB64}`)
+
+      const isValid = await crypto.subtle.verify(
+        {
+          name: "ECDSA",
+          hash: "SHA-256"
+        },
+        publicKey,
+        signatureBytes,
+        dataToVerify
+      )
+
+      if (!isValid) {
+        throw new Error("Invalid signature")
+      }
+
+      // Verify issuer and audience
+      if (payload.iss !== "6889e7b5174eae4686ab9cf0" || payload.aud !== "6889e7b5174eae4686ab9cf0") {
+        throw new Error("Invalid issuer or audience")
+      }
+
       if (mountedRef.current) {
-        setPayload(mockPayload)
+        setPayload(payload)
         setError("")
         setIsVerified(true)
         setIsScanning(false)
@@ -101,13 +151,53 @@ VGg5YOQqKXgL2gFRyO5vNFXWv5sZnrNy7dfn2LO1eJpQmVdtgEOqE1rNxw==
         stopCamera()
       }
     } catch (err) {
-      console.error("Invalid token:", err)
+      console.error("JWT verification failed:", err)
       if (mountedRef.current) {
-        setError("Invalid or tampered token")
+        setError("Invalid or tampered token: " + err.message)
         setIsScanning(false)
         setScannerState("ERROR")
       }
     }
+  }
+
+  // QR Code detection using canvas
+  const detectQRCode = () => {
+    if (!videoRef.current || !canvasRef.current) return
+
+    const video = videoRef.current
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext('2d')
+
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+
+    // Get image data for QR detection
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+    
+    // Here you would typically use a QR detection library
+    // For now, we'll use a simple pattern detection approach
+    // In a real implementation, you'd want to use jsQR or similar library
+    
+    try {
+      // Simple QR code detection - look for dark/light patterns
+      // This is a very basic implementation and may not work reliably
+      const qrText = scanImageForQR(imageData)
+      if (qrText && qrText.startsWith('ey')) { // Basic JWT check
+        verifyToken(qrText)
+      }
+    } catch (error) {
+      console.log("QR detection error:", error)
+    }
+  }
+
+  // Basic QR pattern detection (simplified)
+  const scanImageForQR = (imageData) => {
+    // This is a placeholder for actual QR detection
+    // In a real implementation, you would use a proper QR detection library
+    // For demo purposes, you could manually enter a JWT token
+    return null
   }
 
   // Start camera for QR scanning
@@ -130,16 +220,8 @@ VGg5YOQqKXgL2gFRyO5vNFXWv5sZnrNy7dfn2LO1eJpQmVdtgEOqE1rNxw==
         streamRef.current = stream
         setScannerState("RUNNING")
         
-        // In a real implementation, you would process video frames here
-        // to detect and decode QR codes
-        
-        // For demo purposes, we'll simulate finding a QR code after 3 seconds
-        setTimeout(() => {
-          if (mountedRef.current && isScanning) {
-            const mockJWT = "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiQWxpY2UgSm9obnNvbiIsImVtYWlsIjoiYWxpY2Uuam9obnNvbkB1bml2ZXJzaXR5LmVkdSJ9.mockSignature"
-            verifyToken(mockJWT)
-          }
-        }, 3000)
+        // Start scanning for QR codes
+        scanIntervalRef.current = setInterval(detectQRCode, 500)
       }
     } catch (err) {
       console.error("Camera access error:", err)
@@ -160,6 +242,10 @@ VGg5YOQqKXgL2gFRyO5vNFXWv5sZnrNy7dfn2LO1eJpQmVdtgEOqE1rNxw==
     if (videoRef.current) {
       videoRef.current.srcObject = null
     }
+    if (scanIntervalRef.current) {
+      clearInterval(scanIntervalRef.current)
+      scanIntervalRef.current = null
+    }
     setIsScanning(false)
     setScannerState("STOPPED")
   }
@@ -168,19 +254,41 @@ VGg5YOQqKXgL2gFRyO5vNFXWv5sZnrNy7dfn2LO1eJpQmVdtgEOqE1rNxw==
   const handleFileUpload = (event) => {
     const file = event.target.files[0]
     if (file) {
-      // In a real implementation, you would:
-      // 1. Read the image file
-      // 2. Process it to detect QR codes
-      // 3. Decode the QR code to get the JWT
-      
-      // For demo, we'll simulate this process
       setError("")
       setScannerState("PROCESSING")
       
-      setTimeout(() => {
-        const mockJWT = "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiQm9iIFNtaXRoIiwiZW1haWwiOiJib2Iuc21pdGhAdW5pdmVyc2l0eS5lZHUifQ.mockSignature"
-        verifyToken(mockJWT)
-      }, 2000)
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const img = new Image()
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          const ctx = canvas.getContext('2d')
+          canvas.width = img.width
+          canvas.height = img.height
+          ctx.drawImage(img, 0, 0)
+          
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+          
+          // Process image for QR code
+          const qrText = scanImageForQR(imageData)
+          if (qrText) {
+            verifyToken(qrText)
+          } else {
+            setError("No QR code found in image")
+            setScannerState("ERROR")
+          }
+        }
+        img.src = e.target.result
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  // Manual JWT input for testing
+  const handleManualInput = () => {
+    const jwt = prompt("Enter JWT token for testing:")
+    if (jwt && jwt.trim()) {
+      verifyToken(jwt.trim())
     }
   }
 
@@ -201,21 +309,13 @@ VGg5YOQqKXgL2gFRyO5vNFXWv5sZnrNy7dfn2LO1eJpQmVdtgEOqE1rNxw==
     return new Date(timestamp * 1000).toLocaleDateString()
   }
 
-  // Mock scan for demo
-  const mockScan = () => {
-    setError("")
-    setScannerState("PROCESSING")
-    const mockJWT = "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiQ2hhcmxpZSBEYXZpcyIsImVtYWlsIjoiY2hhcmxpZS5kYXZpc0B1bml2ZXJzaXR5LmVkdSJ9.mockSignature"
-    verifyToken(mockJWT)
-  }
-
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
         <Card className="w-full max-w-md">
           <CardContent className="pt-6 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading verification system...</p>
+            <p className="text-gray-600">Loading public key...</p>
           </CardContent>
         </Card>
       </div>
@@ -249,6 +349,9 @@ VGg5YOQqKXgL2gFRyO5vNFXWv5sZnrNy7dfn2LO1eJpQmVdtgEOqE1rNxw==
                 <AlertDescription>Processing QR code...</AlertDescription>
               </Alert>
             )}
+
+            {/* Hidden canvas for QR detection */}
+            <canvas ref={canvasRef} style={{ display: 'none' }} />
 
             {/* Camera View */}
             <div className="flex justify-center">
@@ -297,7 +400,7 @@ VGg5YOQqKXgL2gFRyO5vNFXWv5sZnrNy7dfn2LO1eJpQmVdtgEOqE1rNxw==
               <div className="flex gap-2">
                 <Button 
                   onClick={startCamera} 
-                  disabled={isScanning} 
+                  disabled={isScanning || !publicKeyPem} 
                   className="flex-1" 
                   size="lg"
                 >
@@ -325,20 +428,22 @@ VGg5YOQqKXgL2gFRyO5vNFXWv5sZnrNy7dfn2LO1eJpQmVdtgEOqE1rNxw==
                   variant="outline" 
                   className="w-full" 
                   size="lg"
+                  disabled={!publicKeyPem}
                 >
                   <Upload className="h-4 w-4 mr-2" />
                   Upload QR Code Image
                 </Button>
               </div>
 
-              {/* Demo Button */}
+              {/* Manual Input for Testing */}
               <Button 
-                onClick={mockScan} 
+                onClick={handleManualInput} 
                 variant="secondary" 
                 className="w-full"
+                disabled={!publicKeyPem}
               >
                 <QrCode className="h-4 w-4 mr-2" />
-                Demo Scan (Test)
+                Manual JWT Input (Testing)
               </Button>
             </div>
 
@@ -346,6 +451,13 @@ VGg5YOQqKXgL2gFRyO5vNFXWv5sZnrNy7dfn2LO1eJpQmVdtgEOqE1rNxw==
               <div className="text-center">
                 <p className="text-xs text-gray-500">Status: {scannerState}</p>
               </div>
+            )}
+
+            {!publicKeyPem && (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>Waiting for public key to load...</AlertDescription>
+              </Alert>
             )}
           </CardContent>
         </Card>
