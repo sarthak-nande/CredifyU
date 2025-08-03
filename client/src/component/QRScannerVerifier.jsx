@@ -101,7 +101,7 @@ const QRScannerVerifier = () => {
 
       await html5QrCode.start(
         { facingMode: 'environment' },
-        { fps: 10, qrbox: 280 },
+        { fps: 10, qrbox: 250 },
         (decodedText) => {
           // Only process if component is still mounted
           if (mountedRef.current) {
