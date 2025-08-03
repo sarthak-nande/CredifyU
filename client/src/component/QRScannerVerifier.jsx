@@ -101,7 +101,7 @@ const QRScannerVerifier = () => {
 
       await html5QrCode.start(
         { facingMode: 'environment' },
-        { fps: 10, qrbox: 280 },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
         (decodedText) => {
           // Only process if component is still mounted
           if (mountedRef.current) {
@@ -170,7 +170,7 @@ const QRScannerVerifier = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md mx-auto">
         <CardHeader className="text-center">
           <CardTitle className="flex items-center justify-center gap-2 text-2xl">
             <QrCode className="h-6 w-6" />
@@ -189,16 +189,23 @@ const QRScannerVerifier = () => {
           {!payload && (
             <div className="flex justify-center">
               <div className="relative">
-                <div className="w-80 h-80 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center bg-gray-50">
+                <div className="w-full max-w-sm sm:w-80 h-80 border-2 border-dashed border-gray-300 rounded-lg overflow-hidden bg-gray-50">
                   <div
                     id="qr-reader"
                     ref={qrRef}
-                    style={{ width: '100%', height: '100%' }}
+                    className="w-full h-full"
+                    style={{ 
+                      width: '100%', 
+                      height: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
                   />
                   {!isScanning && (
                     <div className="absolute inset-0 flex items-center justify-center text-center pointer-events-none">
                       <div>
-                        <Camera className="h-36 w-16 text-gray-400 mx-auto mb-2" />
+                        <Camera className="h-16 w-16 text-gray-400 mx-auto mb-2" />
                         <p className="text-sm text-gray-500">Camera will appear here</p>
                       </div>
                     </div>
