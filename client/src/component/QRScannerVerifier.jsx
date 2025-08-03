@@ -15,7 +15,9 @@ const QRScannerVerifier = () => {
       try {
         const response = await api.post('/api/get-publickey',{collegeId : "6889e7b5174eae4686ab9cf0"} , { withCredentials: true });
         if (response.status === 200) {
-          setPublicKeyPem(response.data.publicKey);
+          const raw = response.data.publicKey; // comes from backend
+          const publicKeyPem = raw.replace(/\\n/g, '\n');
+          setPublicKeyPem(publicKeyPem);
         } else {
           console.error('Failed to fetch public key');
           setError('Failed to fetch public key');
