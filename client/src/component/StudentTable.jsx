@@ -24,10 +24,20 @@ import { useDispatch, useSelector } from "react-redux";
 import { addStudentStart, addStudentSuccess } from "@/redux/studentSlice";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input"; // Import Input component
-import { SendIcon, DeleteIcon, EditIcon } from "lucide-react"; // Import EditIcon
+import { Input } from "@/components/ui/input";
+import { SendIcon, DeleteIcon, EditIcon, QrCodeIcon } from "lucide-react";
 import { toast } from "sonner";
-import EditStudentSheet from "./EditStudentSheet"; // Import the EditStudentSheet component
+import EditStudentSheet from "./EditStudentSheet";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { QRCodeCanvas } from "qrcode.react";
 
 export function StudentTable() {
   const dispatch = useDispatch();
@@ -36,24 +46,22 @@ export function StudentTable() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
-
   const [selectedIds, setSelectedIds] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editingStudentId, setEditingStudentId] = useState(null);
 
+  const [qrDialogOpen, setQrDialogOpen] = useState(false);
+  const [qrToken, setQrToken] = useState("");
+  const [selectedStudentName, setSelectedStudentName] = useState("");
+
   const fetchStudents = async () => {
-    // ... (rest of the fetchStudents function remains the same)
     try {
       const response = await api.get("/api/get-students", {
         withCredentials: true,
       });
       const data = await response.data;
-      if (!data || !data.students) {
-        console.log("No students found");
-      }
-
       dispatch(addStudentStart());
       dispatch(addStudentSuccess(data.students));
     } catch (error) {
@@ -72,28 +80,14 @@ export function StudentTable() {
   };
 
   const handleDelete = async () => {
-    // ... (rest of the handleDelete function remains the same)
     try {
-      const res = await api.delete("/api/delete-students", {
+      await api.delete("/api/delete-students", {
         data: { studentIds: selectedIds },
         withCredentials: true,
       });
-      if (res.status !== 200) {
-        throw new Error("Network response was not ok");
-      }
-      const response = await api.get("/api/get-students", {
-        withCredentials: true,
-      });
-      const data = await response.data;
-
-      if (!data || !data.students) {
-        console.log("No students found");
-      }
-
-      dispatch(addStudentStart());
-      dispatch(addStudentSuccess(data.students));
+      await fetchStudents();
       toast.success("Students deleted successfully");
-      setSelectedIds([]); // Clear selection after deletion
+      setSelectedIds([]);
     } catch (error) {
       console.error("Error deleting students:", error);
       toast.error("Failed to delete students");
@@ -102,19 +96,35 @@ export function StudentTable() {
 
   const handleSendQR = () => {
     alert("Send QR to: " + selectedIds.join(", "));
-    // Implement QR logic here
+    // You can enhance this logic to send QR via email/notification
   };
 
   const handleEdit = (studentId) => {
     setEditingStudentId(studentId);
     setIsSheetOpen(true);
   };
-  
-  // Close sheet and reset state
+
   const handleSheetClose = () => {
     setIsSheetOpen(false);
     setEditingStudentId(null);
-    fetchStudents(); // Re-fetch students to show updated data
+    fetchStudents();
+  };
+
+  const handleSeeQR = async (studentToken) => {
+    try {
+      
+      const token = studentToken;
+      if (token) {
+        setQrToken(token);
+        
+        setQrDialogOpen(true);
+      } else {
+        toast.error("No token found for this student");
+      }
+    } catch (error) {
+      console.error("Error fetching token:", error);
+      toast.error("Failed to fetch QR token.");
+    }
   };
 
   const filteredStudents = students.filter(
@@ -187,9 +197,7 @@ export function StudentTable() {
                       setSelectedIds(
                         selectedIds.filter(
                           (id) =>
-                            !paginatedStudents
-                              .map((s) => s?._id)
-                              .includes(id)
+                            !paginatedStudents.map((s) => s?._id).includes(id)
                         )
                       );
                     }
@@ -212,15 +220,21 @@ export function StudentTable() {
                   <TableCell>
                     <Checkbox
                       checked={selectedIds.includes(student?._id)}
-                      onCheckedChange={() => handleCheckboxChange(student?._id)}
+                      onCheckedChange={() =>
+                        handleCheckboxChange(student?._id)
+                      }
                     />
                   </TableCell>
-                  <TableCell className="font-medium text-xs sm:text-sm">{student?._id}</TableCell>
+                  <TableCell className="font-medium text-xs sm:text-sm">
+                    {student?._id}
+                  </TableCell>
                   <TableCell>{student?.name}</TableCell>
-                  <TableCell className="text-xs sm:text-sm">{student?.email}</TableCell>
+                  <TableCell className="text-xs sm:text-sm">
+                    {student?.email}
+                  </TableCell>
                   <TableCell>{student?.year}</TableCell>
                   <TableCell>{student?.branch}</TableCell>
-                  <TableCell className="text-center">
+                  <TableCell className="text-center flex justify-center gap-2">
                     <Button
                       variant="ghost"
                       size="icon"
@@ -228,6 +242,14 @@ export function StudentTable() {
                     >
                       <EditIcon className="h-4 w-4" />
                     </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleSeeQR(student?.token)}
+                    >
+                      <QrCodeIcon className="h-4 w-4" />
+                    </Button>
+
                   </TableCell>
                 </TableRow>
               ))
@@ -252,7 +274,9 @@ export function StudentTable() {
                             setCurrentPage((prev) => Math.max(prev - 1, 1))
                           }
                           className={
-                            currentPage === 1 ? "pointer-events-none opacity-50" : ""
+                            currentPage === 1
+                              ? "pointer-events-none opacity-50"
+                              : ""
                           }
                         />
                       </PaginationItem>
@@ -296,13 +320,33 @@ export function StudentTable() {
           </TableFooter>
         </Table>
       </div>
-      
-      {/* The Sheet component for editing */}
-      <EditStudentSheet 
-        studentId={editingStudentId} 
-        isOpen={isSheetOpen} 
+
+      {/* Edit Student Sheet */}
+      <EditStudentSheet
+        studentId={editingStudentId}
+        isOpen={isSheetOpen}
         onClose={handleSheetClose}
       />
+
+      {/* QR Code Dialog */}
+      <Dialog open={qrDialogOpen} onOpenChange={setQrDialogOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>QR for {selectedStudentName}</DialogTitle>
+          </DialogHeader>
+
+          {qrToken ? (
+            <div className="flex flex-col items-center gap-4">
+              <QRCodeCanvas value={qrToken} size={256} />
+              <DialogClose asChild>
+                <Button variant="secondary">Close</Button>
+              </DialogClose>
+            </div>
+          ) : (
+            <p>Loading QR...</p>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

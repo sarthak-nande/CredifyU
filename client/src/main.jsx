@@ -14,6 +14,8 @@ import { createBrowserRouter } from 'react-router-dom';
 import AuthLayout from './context/AuthContext';
 import { RouterProvider } from 'react-router';
 import PublicRoutes from './context/PublicRoutes';
+import Scanner from './pages/Scanner';
+import Home from './pages/Home';
 
 const router = createBrowserRouter([
   {
@@ -22,7 +24,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: '/',
-        element: <><p>Hi AM</p></>,
+        element: <Home />,
       },
       {
         path: '/register',
@@ -41,7 +43,10 @@ const router = createBrowserRouter([
         path: '/college/dashboard/students',
         element: <AuthLayout><Dashboard><AddStudent /><StudentTable /></Dashboard></AuthLayout>,
       },
-      
+      {
+        path: 'student/scanner',
+        element: <Scanner />
+      }
 
     ]
   }

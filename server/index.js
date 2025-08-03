@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import connection from "./db/connection.js"
 import UserRoutes from "./routes/UserRoutes.js"
 import StudentRoutes from "./routes/StudentRoutes.js"
+import KeysRoutes from "./routes/KeysRoutes.js";
 
 env.config();
 connection();
@@ -21,6 +22,7 @@ app.use(cors({
 
 app.use('/api', UserRoutes);
 app.use('/api', StudentRoutes);
+app.use('/api', KeysRoutes);
 
 app.get("/" , async(req, res) => {
   res.status(200).json({"message" : "server is running"});
