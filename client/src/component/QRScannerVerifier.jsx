@@ -198,7 +198,7 @@ const QRScannerVerifier = () => {
                   {!isScanning && (
                     <div className="absolute inset-0 flex items-center justify-center text-center pointer-events-none">
                       <div>
-                        <Camera className="h-36 w-16 text-gray-400 mx-auto mb-2" />
+                        <Camera className="h-16 w-16 text-gray-400 mx-auto mb-2" />
                         <p className="text-sm text-gray-500">Camera will appear here</p>
                       </div>
                     </div>
