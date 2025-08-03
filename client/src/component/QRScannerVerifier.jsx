@@ -35,6 +35,7 @@ const QRScannerVerifier = () => {
 
   const verifyToken = async (token) => {
     try {
+      console.log('Verifying token:', token);
       const publicKey = await importSPKI(publicKeyPem, 'ES256');
       const { payload } = await jwtVerify(token, publicKey);
       setPayload(payload);
