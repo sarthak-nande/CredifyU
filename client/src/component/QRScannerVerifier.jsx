@@ -6,14 +6,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { QrCode, CheckCircle, RotateCcw, ArrowRight, User, Mail, Phone, Calendar, GraduationCap, AlertCircle, Camera } from 'lucide-react'
+import { QrCode, CheckCircle, RotateCcw, ArrowRight, User, Mail, Phone, Calendar, GraduationCap, AlertCircle, Camera, ForwardIcon } from 'lucide-react'
 import api from "@/utils/api"
+import { QRCodeCanvas } from "qrcode.react"
+import { set } from "lodash"
+import { useSelector } from "react-redux"
+import CollegeSelect from "./CollegeSelect"
+import { useNavigate } from "react-router-dom"
 
 export default function JWTQRScanner() {
   const qrRef = useRef(null);
   const html5QrCodeRef = useRef(null);
   const mountedRef = useRef(true);
   const scannerIdRef = useRef(`qr-reader-${Date.now()}`);
+  const navigate = useNavigate();
 
   const [isScanning, setIsScanning] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
@@ -21,10 +27,10 @@ export default function JWTQRScanner() {
   const [error, setError] = useState("");
   const [publicKeyPem, setPublicKeyPem] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [myToken, setMyToken] = useState("");
 
-  // Mock API function to get the public key
+  const myCollegeId = useSelector((state) => state.college.collegeId);
 
-  // Cleanup scanner function
   const cleanupScanner = async () => {
     if (html5QrCodeRef.current) {
       try {
@@ -46,7 +52,7 @@ export default function JWTQRScanner() {
     async function fetchPublicKey() {
       try {
         setIsLoading(true);
-        const response = await api.post("/api/get-publickey", { collegeId: "6889e7b5174eae4686ab9cf0" }, { withCredentials: true });
+        const response = await api.post("/api/get-publickey", { collegeId: myCollegeId }, { withCredentials: true });
         if (mountedRef.current) {
           if (response.status === 200) {
             const fixedPem = response.data.publicKey.replace(/\\n/g, "\n");
@@ -86,6 +92,7 @@ export default function JWTQRScanner() {
       const onScanSuccess = (decodedText, decodedResult) => {
         if (mountedRef.current && decodedText) {
           cleanupScanner();
+          setMyToken(decodedText);
           verifyToken(decodedText);
         }
       };
@@ -113,12 +120,12 @@ export default function JWTQRScanner() {
   const verifyToken = async (token) => {
     try {
       if (!publicKeyPem) throw new Error("Public key not loaded yet");
-      
+
       const publicKey = await importSPKI(publicKeyPem, "ES256");
 
       const { payload: verifiedPayload } = await jwtVerify(token, publicKey, {
-        issuer: "6889e7b5174eae4686ab9cf0",
-        audience: "6889e7b5174eae4686ab9cf0",
+        issuer: myCollegeId,
+        audience: myCollegeId,
       });
 
       if (mountedRef.current) {
@@ -189,6 +196,10 @@ export default function JWTQRScanner() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
+              <div className="flex items-center justify-center mb-4">
+                <QRCodeCanvas value={myToken} size={256} />
+              </div>
+              <Separator />
               <div className="space-y-4">
                 <div className="text-center">
                   <h2 className="text-2xl font-bold text-gray-800">{payload?.name}</h2>
@@ -264,66 +275,77 @@ export default function JWTQRScanner() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="flex items-center justify-center gap-2 text-2xl">
-            <QrCode className="h-6 w-6" />
-            Scan JWT QR Code
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="text-center space-y-6">
-          {error && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-          <div className="flex justify-center">
-            <div className="relative w-80 h-80">
-              <div
-                ref={qrRef}
-                id={scannerIdRef.current}
-                className={`w-full h-full border-2 border-dashed border-gray-300 rounded-lg overflow-hidden ${
-                  !isScanning ? "flex items-center justify-center bg-gray-50" : ""
-                }`}
-              >
-                {!isScanning && (
-                  <div className="text-center">
-                    <Camera className="h-16 w-16 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-500">Camera will appear here</p>
-                  </div>
+    myCollegeId ? (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="flex items-center justify-center gap-2 text-2xl">
+              <QrCode className="h-6 w-6" />
+              Scan JWT QR Code
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-center space-y-6">
+            {error && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            <div className="flex justify-center">
+              <div className="relative w-80 h-80">
+                <div
+                  ref={qrRef}
+                  id={scannerIdRef.current}
+                  className={`w-full h-full border-2 border-dashed border-gray-300 rounded-lg overflow-hidden ${!isScanning ? "flex items-center justify-center bg-gray-50" : ""
+                    }`}
+                >
+                  {!isScanning && (
+                    <div className="text-center">
+                      <Camera className="h-16 w-16 text-gray-400 mx-auto mb-2" />
+                      <p className="text-sm text-gray-500">Camera will appear here</p>
+                    </div>
+                  )}
+                </div>
+                {isScanning && (
+                  <Badge className="absolute top-2 left-2 bg-green-500 text-white px-2 py-1">
+                    Scanning...
+                  </Badge>
                 )}
               </div>
-              {isScanning && (
-                <Badge className="absolute top-2 left-2 bg-green-500 text-white px-2 py-1">
-                  Scanning...
-                </Badge>
-              )}
             </div>
-          </div>
-          <div className="flex flex-col gap-2">
-            <Button
-              onClick={() => setIsScanning(true)}
-              disabled={isScanning || !publicKeyPem}
-              className="w-full"
-              size="lg"
-            >
-              {isScanning ? "Scanning..." : "Start Scan"}
-            </Button>
-            {isScanning && (
-              <Button onClick={() => setIsScanning(false)} variant="outline" className="w-full" size="lg">
-                Stop Scan
+            <div className="flex flex-col gap-2">
+              <Button
+                onClick={() => setIsScanning(true)}
+                disabled={isScanning || !publicKeyPem}
+                className="w-full"
+                size="lg"
+              >
+                {isScanning ? "Scanning..." : "Start Scan"}
               </Button>
-            )}
-            <Button onClick={handleRescan} variant="secondary" className="w-full" size="lg">
-              <RotateCcw className="h-4 w-4 mr-2" />
-              Rescan
-            </Button>
-          </div>
-          
-        </CardContent>
-      </Card>
-    </div>
+              {isScanning && (
+                <Button
+                  onClick={async () => {
+                    await cleanupScanner(); // stop and clear the scanner
+                    setIsScanning(false);   // update state
+                  }}
+                  variant="outline"
+                  className="w-full"
+                  size="lg"
+                >
+                  Stop Scan
+                </Button>
+
+              )}
+              <Button onClick={handleRescan} variant="secondary" className="w-full" size="lg">
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Rescan
+              </Button>
+            </div>
+
+          </CardContent>
+        </Card>
+      </div>
+    ) : (navigate("/student/college-name"))// Redirect to college selection if not set
+
   );
 }

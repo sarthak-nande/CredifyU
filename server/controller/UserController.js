@@ -30,7 +30,7 @@ async function SignUp(req, res) {
         }
 
         const isEmailAlreadyPresent = await UserModel.findOne({
-            email : email
+            email: email
         });
 
         if (isEmailAlreadyPresent) {
@@ -65,13 +65,13 @@ async function SignUp(req, res) {
 
                 getCreatedUser.refreshToken = refreshToken;
 
-                const {publicKey, privateKey} = await generateKeys();
+                const { publicKey, privateKey } = await generateKeys();
 
-                if(!publicKey || !privateKey) {
+                if (!publicKey || !privateKey) {
                     return res.status(500).json({ message: "Error Generating Keys" });
                 }
 
-                const {iv , data} = await encryptText(privateKey);
+                const { iv, data } = await encryptText(privateKey);
 
                 if (!iv || !data) {
                     return res.status(500).json({ message: "Error Encrypting Keys" });
@@ -302,4 +302,33 @@ async function SaveUserDetails(req, res) {
     }
 }
 
-export { SignUp, LogIn, GetUser, RefreshAccessToken, SaveUserDetails };
+async function CollegeNames(req, res) {
+    try {
+
+        const colleges = await UserModel.find();
+
+        if (!colleges || colleges.length === 0) {
+            return res.status(404).json({
+                message: "No colleges found"
+            });
+        }
+
+        const collegeNames = colleges.map(college => ({
+            id: college._id,
+            name: college.collegeName || "Unknown College"
+        }));
+
+        return res.status(200).json({
+            colleges: collegeNames
+        });
+
+    } catch (error) {
+        console.log("Error Occurred While Fetching College Names", error);
+        return res.status(500).json({
+            message: "Internal Server Error"
+        });
+    }
+
+}
+
+export { SignUp, LogIn, GetUser, RefreshAccessToken, SaveUserDetails, CollegeNames };

@@ -16,6 +16,7 @@ import { RouterProvider } from 'react-router';
 import PublicRoutes from './context/PublicRoutes';
 import Scanner from './pages/Scanner';
 import Home from './pages/Home';
+import CollegeName from './pages/CollegeName';
 
 const router = createBrowserRouter([
   {
@@ -46,6 +47,10 @@ const router = createBrowserRouter([
       {
         path: 'student/scanner',
         element: <Scanner />
+      },
+      {
+        path: '/student/college-name',
+        element: <CollegeName />
       }
 
     ]

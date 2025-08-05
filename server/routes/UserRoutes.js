@@ -4,7 +4,8 @@ import {
   LogIn,
   GetUser,
   RefreshAccessToken,
-  SaveUserDetails
+  SaveUserDetails,
+  CollegeNames
 } from '../controller/UserController.js';
 
 const router = express.Router();
@@ -30,5 +31,7 @@ router.post('/logout', (req, res) => {
   res.clearCookie('refreshToken', cookieOptions);
   return res.status(200).json({ message: 'Logged out successfully' });
 });
+
+router.get('/college-names', CollegeNames);
 
 export default router;
