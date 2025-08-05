@@ -13,6 +13,7 @@ import { set } from "lodash"
 import { useSelector } from "react-redux"
 import CollegeSelect from "./CollegeSelect"
 import { useNavigate } from "react-router-dom"
+import SuccessCard from "./SuccessCard"
 
 export default function JWTQRScanner() {
   const qrRef = useRef(null);
@@ -28,6 +29,7 @@ export default function JWTQRScanner() {
   const [publicKeyPem, setPublicKeyPem] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [myToken, setMyToken] = useState("");
+  const [isForwarded, setIsForwarded] = useState(false);
 
   const myCollegeId = useSelector((state) => state.college.collegeId);
 
@@ -150,8 +152,7 @@ export default function JWTQRScanner() {
   };
 
   const handleMoveForward = () => {
-    console.log("Moving forward with verified student:", payload);
-    // Add your move forward logic here
+    setIsForwarded(true);
   };
 
   const mockScan = () => {
@@ -175,6 +176,7 @@ export default function JWTQRScanner() {
       </div>
     );
   }
+
 
   if (isVerified) {
     return (
@@ -264,10 +266,7 @@ export default function JWTQRScanner() {
               <RotateCcw className="h-4 w-4 mr-2" />
               Rescan
             </Button>
-            <Button onClick={handleMoveForward} className="flex-1">
-              Move Forward
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
+            <SuccessCard />
           </div>
         </div>
       </div>
@@ -341,7 +340,7 @@ export default function JWTQRScanner() {
                 Rescan
               </Button>
             </div>
-
+            
           </CardContent>
         </Card>
       </div>
