@@ -17,6 +17,8 @@ import PublicRoutes from './context/PublicRoutes';
 import Scanner from './pages/Scanner';
 import Home from './pages/Home';
 import CollegeName from './pages/CollegeName';
+import SavedInfo from './pages/SavedInfo';
+import InfoCard from './pages/InfoCard';
 
 const router = createBrowserRouter([
   {
@@ -51,8 +53,15 @@ const router = createBrowserRouter([
       {
         path: '/student/college-name',
         element: <CollegeName />
+      },
+      {
+        path: '/student/saved-info',
+        element: <SavedInfo />
+      },
+      {
+        path: '/student/saved-info/card',
+        element: <InfoCard />
       }
-
     ]
   }
 

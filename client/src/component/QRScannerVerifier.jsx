@@ -95,6 +95,7 @@ export default function JWTQRScanner() {
         if (mountedRef.current && decodedText) {
           cleanupScanner();
           setMyToken(decodedText);
+          localStorage.setItem("token", decodedText);
           verifyToken(decodedText);
         }
       };
@@ -132,6 +133,7 @@ export default function JWTQRScanner() {
 
       if (mountedRef.current) {
         setPayload(verifiedPayload);
+        localStorage.setItem("student", JSON.stringify(verifiedPayload));
         setIsVerified(true);
         setError("");
       }
@@ -153,11 +155,6 @@ export default function JWTQRScanner() {
 
   const handleMoveForward = () => {
     setIsForwarded(true);
-  };
-
-  const mockScan = () => {
-    cleanupScanner();
-    verifyToken(mockJWT);
   };
 
   const formatDate = (timestamp) => {

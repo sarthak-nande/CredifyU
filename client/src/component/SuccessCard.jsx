@@ -15,7 +15,7 @@ export default function SuccessCard() {
     }, 2000);
 
     setTimeout(() => {
-      window.location.href = "/dashboard";
+      window.location.href = "/student/saved-info";
     }, 5000);
   };
 
