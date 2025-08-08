@@ -19,6 +19,7 @@ import Home from './pages/Home';
 import CollegeName from './pages/CollegeName';
 import SavedInfo from './pages/SavedInfo';
 import InfoCard from './pages/InfoCard';
+import UserRole from './pages/UserRole';
 
 const router = createBrowserRouter([
   {
@@ -61,6 +62,10 @@ const router = createBrowserRouter([
       {
         path: '/student/saved-info/card',
         element: <InfoCard />
+      },
+      {
+        path: '/user/select-role',
+        element: <UserRole />
       }
     ]
   }

@@ -15,8 +15,8 @@ export default function StudentCard() {
     const [myToken, setMyToken] = useState("");
 
     const formatDate = (timestamp) => {
-    return new Date(timestamp * 1000).toLocaleDateString();
-  };
+        return new Date(timestamp * 1000).toLocaleDateString();
+    };
 
     useEffect(() => {
         try {
@@ -119,12 +119,11 @@ export default function StudentCard() {
                             </div>
                         </div>
                     </CardContent>
-                    
+
                 </Card>
-                
+
             </div>
-            <DeleteButton redirectTo="/student/college-name" />
         </div>
-        
+
     )
 }

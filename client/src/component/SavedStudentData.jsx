@@ -130,10 +130,10 @@ export default function SavedStudentData() {
               </div>
             </CardContent>
           </Card>
-          
+
           {/* Delete Button Below Card */}
           <div className="max-w-md mx-auto">
-            <DeleteButton 
+            <DeleteButton
               redirectTo="/student/college-name"
               title="Delete Student Data?"
               description="This will permanently delete all your saved student information. This action cannot be undone."
@@ -159,9 +159,9 @@ export default function SavedStudentData() {
             </div>
           </CardContent>
         </Card>
-        
+
         {/* Delete Button Below Card for Mobile */}
-        <DeleteButton 
+        <DeleteButton
           redirectTo="/student/college-name"
           title="Delete Student Data?"
           description="This will permanently delete all your saved student information. This action cannot be undone."
