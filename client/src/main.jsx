@@ -7,7 +7,8 @@ import store from './redux/store';
 import { Toaster } from 'sonner';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
-import Dashboard from './component/DashboardLayout';
+import Dashboard from './pages/Dashboard';
+import DashboardLayout from './component/DashboardLayout';
 import AddStudent from './component/AddStudent';
 import { StudentTable } from './component/StudentTable';
 import { createBrowserRouter } from 'react-router-dom';
@@ -20,6 +21,8 @@ import CollegeName from './pages/CollegeName';
 import SavedInfo from './pages/SavedInfo';
 import InfoCard from './pages/InfoCard';
 import UserRole from './pages/UserRole';
+import UserDashboard from './pages/UserDashboard';
+import DashboardContent from './component/DashboardContent';
 
 const router = createBrowserRouter([
   {
@@ -31,17 +34,16 @@ const router = createBrowserRouter([
         element: <Home />,
       },
       {
-        path: '/register',
-        element: <AuthLayout><Signup /></AuthLayout>,
+        path: '/college/register',
+        element: <PublicRoutes><Signup /></PublicRoutes>,
       },
       {
-        path: '/login',
+        path: '/college/login',
         element: <PublicRoutes><Login /></PublicRoutes>
       },
       {
         path: '/college/dashboard',
-        element: <AuthLayout><Dashboard>
-          </Dashboard></AuthLayout>,
+        element: <AuthLayout><Dashboard><DashboardContent /></Dashboard></AuthLayout>,
       },
       {
         path: '/college/dashboard/students',
@@ -66,6 +68,10 @@ const router = createBrowserRouter([
       {
         path: '/user/select-role',
         element: <UserRole />
+      },
+      {
+        path: '/user/dashboard',
+        element: <UserDashboard />
       }
     ]
   }

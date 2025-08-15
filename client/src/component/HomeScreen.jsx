@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Hero from "./Hero";
 import ActionTile from "./ActionTile";
+import { useNavigate } from 'react-router-dom';
 
 export default function HomeScreen({
   role,
@@ -11,19 +12,14 @@ export default function HomeScreen({
   RoleIcon,
   onBack,
 }) {
+
+  const navigate = useNavigate();
+
   return (
     <div className="mx-auto grid min-h-dvh max-w-5xl grid-rows-[auto_1fr_auto]">
       <header className="sticky top-0 z-10 border-b bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60">
         <div className="mx-auto flex max-w-5xl items-center gap-2 px-4 py-3 md:px-6">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full"
-            aria-label="Back to role selection"
-            onClick={onBack}
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
+          
 
           <div className="flex items-center gap-2">
             <div className="grid size-8 place-items-center rounded-full bg-black text-white">
@@ -55,8 +51,7 @@ export default function HomeScreen({
               description="View and manage your identity documents"
               icon={Database}
               onClick={() => {
-                // Hook up routing or dialogs here
-                alert("Your Data clicked")
+                navigate("/student/saved-info");
               }}
             />
             <ActionTile
@@ -64,7 +59,7 @@ export default function HomeScreen({
               description="Share or verify identity via QR"
               icon={QrCode}
               onClick={() => {
-                alert("Scan QR clicked")
+                navigate("student/college-name");
               }}
             />
           </div>

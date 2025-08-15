@@ -8,7 +8,7 @@ import { Menu, X } from "lucide-react";
 import api from "@/utils/api";
 import { toast } from "sonner"; // Assuming you want to use sonner for toasts here too
 
-function Dashboard({ children }) {
+function DashboardLayout({ children }) {
   const user = useSelector((state) => state?.user?.user?.user);
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
   const navigate = useNavigate();
@@ -19,7 +19,7 @@ function Dashboard({ children }) {
     try {
       await api.post("/api/logout", {}, { withCredentials: true });
       dispatch(logout());
-      navigate("/login");
+      navigate("/college/login");
       toast("Logout successful!");
     } catch (err) {
       toast("Logout failed");
@@ -79,4 +79,4 @@ function Dashboard({ children }) {
   );
 }
 
-export default Dashboard;
+export default DashboardLayout;

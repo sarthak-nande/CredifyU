@@ -15,6 +15,7 @@ import { useDispatch } from "react-redux";
 import { useEffect } from "react";
 import api from "./utils/api";
 import { loginFailure, loginStart, loginSuccess, setProfileComplete } from "./redux/userSlice";
+import { useNavigate } from "react-router-dom";
 
 
 function App() {
@@ -39,6 +40,8 @@ function App() {
     }
     fetchData();
   }, [dispatch]);
+
+  const navigate = useNavigate();
 
   return (
     <>
