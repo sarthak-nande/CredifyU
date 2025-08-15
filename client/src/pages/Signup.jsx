@@ -64,16 +64,29 @@ export default function CollegeSignupPage() {
 
     setIsLoading(true)
 
-    const res = await api.post("/api/signup",
+    try {
+      const res = await api.post("/api/signup",
         { email: formData.email, password: formData.password },
         { withCredentials: true }
       );
 
       if (res.status === 200) {
-        toast("Signup successful!");
-        setIsLoading(false)
-        navigate("/college/login");
+        if (res.data.requiresOTP) {
+          toast("OTP sent to your email!");
+          setIsLoading(false)
+          // Navigate to OTP verification with email and password
+          navigate("/college/verify-otp", { 
+            state: { 
+              email: formData.email, 
+              password: formData.password 
+            } 
+          });
+        }
       }
+    } catch (error) {
+      setIsLoading(false)
+      toast(error.response?.data?.message || "Signup failed. Please try again.")
+    }
 
     console.log("Signup attempt:", formData)
 

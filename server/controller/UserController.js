@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken"
 import { generateKeys } from "../middleware/keysGenaratator.js";
 import keys from "../model/keys.js";
 import { encryptText } from "../middleware/crpytoGenarator.js";
+import { sendOTP, verifyOTP } from "../middleware/otpGenerator.js";
 
 async function GenerateAccessTokenAndRefreshToken(userId) {
     try {
@@ -39,79 +40,114 @@ async function SignUp(req, res) {
             })
         }
 
+        // Send OTP for email verification
+        await sendOTP(email);
+        
+        return res.status(200).json({ 
+            message: "OTP sent to your email. Please verify to complete registration.",
+            email: email,
+            requiresOTP: true
+        });
+
+    } catch (error) {
+        console.log("Error While Doing SignUp " + error)
+        return res.status(500).json({
+            message: "Internal Server Error"
+        })
+    }
+}
+
+// Complete signup after OTP verification
+async function CompleteSignup(req, res) {
+    try {
+        const { email, password, otp, Name, CollegeName, phone, CollegeAddress } = req.body;
+
+        if (!email || !password || !otp) {
+            return res.status(400).json({ message: "Email, password, and OTP are required!" })
+        }
+
+        // Verify OTP first
+        const isOTPValid = await verifyOTP(email, otp);
+        if (!isOTPValid) {
+            return res.status(400).json({ message: "Invalid or expired OTP" });
+        }
+
+        // Check if user already exists
+        const isEmailAlreadyPresent = await UserModel.findOne({
+            email: email
+        });
+
+        if (isEmailAlreadyPresent) {
+            return res.status(400).json({
+                message: "User Already Exist!"
+            })
+        }
+
         const hashPassword = await bcrypt.hash(password, 10);
 
-        if (!isEmailAlreadyPresent) {
-            const newUser = await UserModel.create({
-                email: email,
-                password: hashPassword
-            })
+        const newUser = await UserModel.create({
+            email: email,
+            password: hashPassword
+        })
 
-            console.log(newUser);
+        console.log(newUser);
 
-            const getCreatedUser = await UserModel.findById(newUser._id);
+        const getCreatedUser = await UserModel.findById(newUser._id);
 
-            console.log(getCreatedUser);
+        console.log(getCreatedUser);
 
-            if (!getCreatedUser) {
-                return res.status(400).json({
-                    message: "Unable To Fetch Created User!"
-                })
-            }
-
-            if (getCreatedUser) {
-                const accessToken = getCreatedUser.getAccessToken();
-                const refreshToken = getCreatedUser.getRefreshToken();
-
-                getCreatedUser.refreshToken = refreshToken;
-
-                const { publicKey, privateKey } = await generateKeys();
-
-                if (!publicKey || !privateKey) {
-                    return res.status(500).json({ message: "Error Generating Keys" });
-                }
-
-                const { iv, data } = await encryptText(privateKey);
-
-                if (!iv || !data) {
-                    return res.status(500).json({ message: "Error Encrypting Keys" });
-                }
-
-                const createdKeys = await keys.create({
-                    publicKey: publicKey,
-                    privateKey: data,
-                    privateKeyIv: iv,
-                    collegeId: getCreatedUser._id
-                });
-
-                if (!createdKeys) {
-                    return res.status(500).json({ message: "Error Saving Keys" });
-                }
-
-                await getCreatedUser.save();
-
-                const options = {
-                    httpOnly: true,
-                    secure: true
-                };
-
-                const user = getCreatedUser;
-
-                return res.status(200).cookie("accessToken", accessToken, options).cookie("refreshToken", refreshToken, options).json({ user, accessToken: accessToken, refreshToken: refreshToken });
-            } else {
-                return res.status(400).json({
-                    message: "Error Occurred While Creating Account"
-                });
-            }
-        }
-        else {
-            console.log("Sign-up Process Is Failed!");
+        if (!getCreatedUser) {
             return res.status(400).json({
-                message: "Sign-up Process Is Failed!"
+                message: "Unable To Fetch Created User!"
+            })
+        }
+
+        if (getCreatedUser) {
+            const accessToken = getCreatedUser.getAccessToken();
+            const refreshToken = getCreatedUser.getRefreshToken();
+
+            getCreatedUser.refreshToken = refreshToken;
+
+            const { publicKey, privateKey } = await generateKeys();
+
+            if (!publicKey || !privateKey) {
+                return res.status(500).json({ message: "Error Generating Keys" });
+            }
+
+            const { iv, data } = await encryptText(privateKey);
+
+            if (!iv || !data) {
+                return res.status(500).json({ message: "Error Encrypting Keys" });
+            }
+
+            const createdKeys = await keys.create({
+                publicKey: publicKey,
+                privateKey: data,
+                privateKeyIv: iv,
+                collegeId: getCreatedUser._id
+            });
+
+            if (!createdKeys) {
+                return res.status(500).json({ message: "Error Saving Keys" });
+            }
+
+            await getCreatedUser.save();
+
+            const options = {
+                httpOnly: true,
+                secure: true
+            };
+
+            const user = getCreatedUser;
+
+            return res.status(200).cookie("accessToken", accessToken, options).cookie("refreshToken", refreshToken, options).json({ user, accessToken: accessToken, refreshToken: refreshToken });
+        } else {
+            return res.status(400).json({
+                message: "Error Occurred While Creating Account"
             });
         }
     } catch (error) {
-        console.log("Error While Doing SignUp " + error)
+        console.log("Error While Completing SignUp " + error)
         return res.status(500).json({
             message: "Internal Server Error"
         })
@@ -331,4 +367,61 @@ async function CollegeNames(req, res) {
 
 }
 
-export { SignUp, LogIn, GetUser, RefreshAccessToken, SaveUserDetails, CollegeNames };
+// Send OTP to email
+async function SendOTP(req, res) {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ message: "Email is required!" });
+        }
+
+        await sendOTP(email);
+        return res.status(200).json({ message: "OTP sent successfully to your email" });
+
+    } catch (error) {
+        console.log("Error Occurred While Sending OTP", error);
+        return res.status(500).json({
+            message: "Failed to send OTP. Please try again."
+        });
+    }
+}
+
+// Verify OTP
+async function VerifyOTP(req, res) {
+    try {
+        const { email, otp } = req.body;
+
+        if (!email || !otp) {
+            return res.status(400).json({ message: "Email and OTP are required!" });
+        }
+
+        const isValid = await verifyOTP(email, otp);
+        
+        if (isValid) {
+            await UserModel.findOneAndUpdate(
+                { email: email.toLowerCase() },
+                { isOtpVerified: true },
+                { new: true }
+            );
+            
+            return res.status(200).json({
+                message: "OTP verified successfully",
+                verified: true 
+            });
+        } else {
+            return res.status(400).json({ 
+                message: "Invalid or expired OTP",
+                verified: false 
+            });
+        }
+
+    } catch (error) {
+        console.log("Error Occurred While Verifying OTP", error);
+        return res.status(500).json({
+            message: "Failed to verify OTP. Please try again."
+        });
+    }
+}
+
+export { SignUp, CompleteSignup, LogIn, GetUser, RefreshAccessToken, SaveUserDetails, CollegeNames, SendOTP, VerifyOTP };

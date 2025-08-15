@@ -1,16 +1,21 @@
 import express from 'express';
 import {
   SignUp,
+  CompleteSignup,
   LogIn,
   GetUser,
   RefreshAccessToken,
   SaveUserDetails,
-  CollegeNames
+  CollegeNames,
+  SendOTP,
+  VerifyOTP
 } from '../controller/UserController.js';
 
 const router = express.Router();
 
 router.post('/signup', SignUp);
+
+router.post('/complete-signup', CompleteSignup);
 
 router.post('/login', LogIn);
 
@@ -33,5 +38,9 @@ router.post('/logout', (req, res) => {
 });
 
 router.get('/college-names', CollegeNames);
+
+router.post('/send-otp', SendOTP);
+
+router.post('/verify-otp', VerifyOTP);
 
 export default router;

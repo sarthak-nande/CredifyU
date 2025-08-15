@@ -42,6 +42,10 @@ const User = new mongoose.Schema({
     },
     refreshToken: {
         type: String,
+    },
+    isOtpVerified: {
+        type: Boolean,
+        default: false
     }
 })
 

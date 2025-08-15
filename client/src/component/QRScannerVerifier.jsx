@@ -33,6 +33,82 @@ export default function JWTQRScanner() {
 
   const myCollegeId = useSelector((state) => state.college.collegeId);
 
+  // Function to get students array from localStorage
+  const getStudentsFromStorage = () => {
+    try {
+      const students = localStorage.getItem("students");
+      return students ? JSON.parse(students) : [];
+    } catch (error) {
+      console.error("Error parsing students data", error);
+      return [];
+    }
+  };
+
+  // Function to save student to array in localStorage
+  const saveStudentToArray = (studentData, token) => {
+    try {
+      const existingStudents = getStudentsFromStorage();
+      
+      // Check if student already exists (by email or ID)
+      const studentExists = existingStudents.some(student => 
+        student.email === studentData.email || 
+        (student._id && studentData._id && student._id === studentData._id)
+      );
+
+      if (!studentExists) {
+        // Add timestamp and token for when data was saved
+        const studentWithMetadata = {
+          ...studentData,
+          token: token,
+          savedAt: new Date().toISOString(),
+          scannedAt: new Date().toISOString(),
+          id: Date.now(), // Generate unique ID if not present
+          collegeId: myCollegeId
+        };
+        
+        existingStudents.push(studentWithMetadata);
+        localStorage.setItem("students", JSON.stringify(existingStudents));
+        
+        // Set as current student
+        localStorage.setItem("currentStudent", JSON.stringify(studentWithMetadata));
+        
+        console.log("Student data saved to array:", studentWithMetadata);
+        return studentWithMetadata;
+      } else {
+        // Update existing student with new scan data
+        const updatedStudents = existingStudents.map(student => {
+          if (student.email === studentData.email || 
+              (student._id && studentData._id && student._id === studentData._id)) {
+            return {
+              ...student,
+              ...studentData,
+              token: token,
+              lastScannedAt: new Date().toISOString(),
+              collegeId: myCollegeId
+            };
+          }
+          return student;
+        });
+        
+        localStorage.setItem("students", JSON.stringify(updatedStudents));
+        
+        // Find and set updated student as current
+        const updatedStudent = updatedStudents.find(student => 
+          student.email === studentData.email || 
+          (student._id && studentData._id && student._id === studentData._id)
+        );
+        
+        localStorage.setItem("currentStudent", JSON.stringify(updatedStudent));
+        
+        console.log("Student data updated in array:", updatedStudent);
+        return updatedStudent;
+      }
+    } catch (error) {
+      console.error("Error saving student to array", error);
+      return studentData;
+    }
+  };
+
   const cleanupScanner = async () => {
     if (html5QrCodeRef.current) {
       try {
@@ -133,7 +209,13 @@ export default function JWTQRScanner() {
 
       if (mountedRef.current) {
         setPayload(verifiedPayload);
+        
+        // Save to array instead of single item
+        const savedStudent = saveStudentToArray(verifiedPayload, token);
+        
+        // Keep old localStorage for backward compatibility (but will be migrated)
         localStorage.setItem("student", JSON.stringify(verifiedPayload));
+        
         setIsVerified(true);
         setError("");
       }
@@ -161,6 +243,12 @@ export default function JWTQRScanner() {
     return new Date(timestamp * 1000).toLocaleDateString();
   };
 
+  // Function to get current student count for display
+  const getStudentCount = () => {
+    const students = getStudentsFromStorage();
+    return students.length;
+  };
+
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
@@ -174,8 +262,9 @@ export default function JWTQRScanner() {
     );
   }
 
-
   if (isVerified) {
+    const studentCount = getStudentCount();
+    
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 p-4 flex flex-col items-center justify-center">
         <div className="w-full max-w-2xl mx-auto space-y-6">
@@ -185,8 +274,16 @@ export default function JWTQRScanner() {
                 <CheckCircle className="h-6 w-6" />
                 <span className="text-lg font-semibold">✅ Verified JWT</span>
               </div>
+              {studentCount > 1 && (
+                <div className="mt-2">
+                  <Badge variant="outline" className="text-green-700 border-green-300">
+                    {studentCount} students saved
+                  </Badge>
+                </div>
+              )}
             </CardContent>
           </Card>
+          
           <Card className="overflow-hidden">
             <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
               <CardTitle className="flex items-center gap-2 text-xl">
@@ -253,6 +350,10 @@ export default function JWTQRScanner() {
                       <span className="text-gray-500">Issued At:</span>
                       <span>{payload ? formatDate(payload.iat) : "N/A"}</span>
                     </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Scanned At:</span>
+                      <span>{new Date().toLocaleString()}</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -287,18 +388,34 @@ export default function JWTQRScanner() {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
+            
+            {/* Show existing student count if any */}
+            {getStudentCount() > 0 && (
+              <div className="bg-blue-50 p-3 rounded-lg">
+                <p className="text-sm text-blue-700">
+                  📚 {getStudentCount()} student{getStudentCount() > 1 ? 's' : ''} already saved
+                </p>
+              </div>
+            )}
+            
             <div className="flex justify-center">
-              <div className="relative w-80 h-80">
+              <div className="relative w-full max-w-sm sm:w-80 h-80 mx-auto">
                 <div
                   ref={qrRef}
                   id={scannerIdRef.current}
-                  className={`w-full h-full border-2 border-dashed border-gray-300 rounded-lg overflow-hidden ${!isScanning ? "flex items-center justify-center bg-gray-50" : ""
-                    }`}
+                  className="w-full h-full border-2 border-dashed border-gray-300 rounded-lg overflow-hidden"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
                 >
                   {!isScanning && (
-                    <div className="text-center">
-                      <Camera className="h-16 w-16 text-gray-400 mx-auto mb-2" />
-                      <p className="text-sm text-gray-500">Camera will appear here</p>
+                    <div className="absolute inset-0 flex items-center justify-center bg-gray-50 pointer-events-none">
+                      <div className="text-center">
+                        <Camera className="h-16 w-16 text-gray-400 mx-auto mb-2" />
+                        <p className="text-sm text-gray-500">Camera will appear here</p>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -321,8 +438,8 @@ export default function JWTQRScanner() {
               {isScanning && (
                 <Button
                   onClick={async () => {
-                    await cleanupScanner(); // stop and clear the scanner
-                    setIsScanning(false);   // update state
+                    await cleanupScanner();
+                    setIsScanning(false);
                   }}
                   variant="outline"
                   className="w-full"
@@ -330,18 +447,15 @@ export default function JWTQRScanner() {
                 >
                   Stop Scan
                 </Button>
-
               )}
               <Button onClick={handleRescan} variant="secondary" className="w-full" size="lg">
                 <RotateCcw className="h-4 w-4 mr-2" />
                 Rescan
               </Button>
             </div>
-            
           </CardContent>
         </Card>
       </div>
-    ) : (navigate("/student/college-name"))// Redirect to college selection if not set
-
+    ) : (navigate("/student/college-name"))
   );
 }

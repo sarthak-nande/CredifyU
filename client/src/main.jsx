@@ -23,6 +23,7 @@ import InfoCard from './pages/InfoCard';
 import UserRole from './pages/UserRole';
 import UserDashboard from './pages/UserDashboard';
 import DashboardContent from './component/DashboardContent';
+import OTPVerification from './pages/OTPVerification';
 
 const router = createBrowserRouter([
   {
@@ -34,12 +35,16 @@ const router = createBrowserRouter([
         element: <Home />,
       },
       {
-        path: '/college/register',
+        path: '/college/signup',
         element: <PublicRoutes><Signup /></PublicRoutes>,
       },
       {
         path: '/college/login',
         element: <PublicRoutes><Login /></PublicRoutes>
+      },
+      {
+        path: '/college/verify-otp',
+        element: <PublicRoutes><OTPVerification /></PublicRoutes>
       },
       {
         path: '/college/dashboard',

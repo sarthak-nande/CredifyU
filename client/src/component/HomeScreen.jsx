@@ -52,15 +52,15 @@ export default function HomeScreen({
 
           <div className="ml-auto flex items-center gap-3">
             {/* Change Role Button */}
-            <Button
+            <Badge
               variant="outline"
               size="sm"
               onClick={handleChangeRole}
-              className="flex items-center gap-1.5 rounded-full border-gray-300 text-gray-600 hover:text-black hover:border-black"
+              className="flex items-center gap-1.5 rounded-full border border-black bg-white text-black cursor-pointer"
             >
-              <RefreshCw className="h-3.5 w-3.5" />
+              <RefreshCw className="h-0.5 w-0.5" />
               <span className="text-xs font-medium">Change Role</span>
-            </Button>
+            </Badge>
 
             <Badge
               variant="secondary"
@@ -87,6 +87,7 @@ export default function HomeScreen({
                 navigate("/student/saved-info");
               }}
             />
+            
             <ActionTile
               title="Scan QR"
               description="Share or verify identity via QR"

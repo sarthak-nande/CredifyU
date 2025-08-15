@@ -78,7 +78,7 @@ export default function CollegeLoginPage() {
   }
 
   const handleNavigateToSignup = () => {
-    navigate("/college/register")
+    navigate("/college/signup")
   }
 
   const handleNavigateToForgotPassword = () => {
