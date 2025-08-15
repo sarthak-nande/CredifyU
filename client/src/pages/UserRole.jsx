@@ -15,9 +15,11 @@ export default function UserRole() {
 
     useEffect(() => {
         const storedRole = localStorage.getItem("role");
-        if (storedRole) {
+        if (storedRole && storedRole !== "college") {
             setRole(storedRole);
             navigate(`/user/dashboard`);
+        }else{
+            setRole(storedRole);
         }
     }, []);
 

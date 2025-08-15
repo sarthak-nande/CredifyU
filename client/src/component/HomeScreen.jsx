@@ -1,7 +1,9 @@
-import React from 'react'
-import { Fingerprint, ChevronLeft, Database, QrCode } from "lucide-react";
+import React, { useState } from 'react'
+import { Fingerprint, ChevronLeft, Database, QrCode, RefreshCw, AlertTriangle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import Hero from "./Hero";
 import ActionTile from "./ActionTile";
 import { useNavigate } from 'react-router-dom';
@@ -14,6 +16,26 @@ export default function HomeScreen({
 }) {
 
   const navigate = useNavigate();
+  const [showChangeRoleDialog, setShowChangeRoleDialog] = useState(false);
+
+  const handleChangeRole = () => {
+    setShowChangeRoleDialog(true);
+  };
+
+  const confirmChangeRole = () => {
+    // Clear all localStorage data
+    localStorage.clear();
+    
+    // Close dialog
+    setShowChangeRoleDialog(false);
+    
+    // Navigate to role selection
+    navigate('/user/select-role');
+  };
+
+  const cancelChangeRole = () => {
+    setShowChangeRoleDialog(false);
+  };
 
   return (
     <div className="mx-auto grid min-h-dvh max-w-5xl grid-rows-[auto_1fr_auto]">
@@ -28,7 +50,18 @@ export default function HomeScreen({
             <div className="text-base font-semibold">CredifyU</div>
           </div>
 
-          <div className="ml-auto flex items-center">
+          <div className="ml-auto flex items-center gap-3">
+            {/* Change Role Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleChangeRole}
+              className="flex items-center gap-1.5 rounded-full border-gray-300 text-gray-600 hover:text-black hover:border-black"
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+              <span className="text-xs font-medium">Change Role</span>
+            </Button>
+
             <Badge
               variant="secondary"
               className="flex items-center gap-1.5 rounded-full border border-black bg-white text-black"
@@ -59,7 +92,7 @@ export default function HomeScreen({
               description="Share or verify identity via QR"
               icon={QrCode}
               onClick={() => {
-                navigate("student/college-name");
+                navigate("/student/college-name");
               }}
             />
           </div>
@@ -69,6 +102,54 @@ export default function HomeScreen({
       <footer className="px-4 pb-4 pt-2 text-center text-xs text-muted-foreground md:px-6">
         Secure by CredifyU • v1.0
       </footer>
+
+      {/* Change Role Confirmation Dialog */}
+      <Dialog open={showChangeRoleDialog} onOpenChange={setShowChangeRoleDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-lg">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              Change Role
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to change your role?
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Alert className="border-amber-200 bg-amber-50">
+            <AlertTriangle className="h-4 w-4 text-amber-600" />
+            <AlertDescription className="text-amber-800">
+              <strong>Warning:</strong> Changing your role will permanently delete all your stored data, including:
+              <ul className="mt-2 ml-4 list-disc space-y-1">
+                <li>Saved credentials and documents</li>
+                <li>Personal information</li>
+                <li>Application preferences</li>
+                <li>Login sessions</li>
+              </ul>
+              This action cannot be undone.
+            </AlertDescription>
+          </Alert>
+
+          <DialogFooter className="flex gap-2 sm:gap-2">
+            <Button
+              variant="outline"
+              onClick={cancelChangeRole}
+              className="flex-1"
+            >
+              <X className="h-4 w-4 mr-2" />
+              No, Keep Current Role
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmChangeRole}
+              className="flex-1"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Yes, Change Role
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
