@@ -89,7 +89,7 @@ export default function OTPVerificationPage() {
 
       if (res.status === 200) {
         toast("Account created successfully!")
-        document.location.href = "/college/dashboard" // Redirect to dashboard after successful signup
+        document.location.href = "/college/login" // Redirect to dashboard after successful signup
       }
     } catch (error) {
       console.error("OTP verification failed:", error)

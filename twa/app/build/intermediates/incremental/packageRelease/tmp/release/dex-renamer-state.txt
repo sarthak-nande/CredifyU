@@ -1,0 +1,4 @@
+#Sat Aug 16 19:52:29 IST 2025
+base.0=C\:\\Users\\91902\\Desktop\\vc-project\\twa\\app\\build\\intermediates\\dex\\release\\minifyReleaseWithR8\\classes.dex
+renamed.0=classes.dex
+path.0=classes.dex

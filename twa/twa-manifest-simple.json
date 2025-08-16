@@ -1,0 +1,17 @@
+{
+  "packageId": "com.credifyu.app",
+  "host": "https://credify-u-oelj.vercel.app",
+  "name": "CredifyU",
+  "launcherName": "CredifyU",
+  "display": "standalone",
+  "themeColor": "#000000",
+  "backgroundColor": "#000000",
+  "startUrl": "/",
+  "iconUrl": "https://credify-u-oelj.vercel.app/web-app-manifest-512x512.png",
+  "maskableIconUrl": "https://credify-u-oelj.vercel.app/web-app-manifest-512x512.png",
+  "enableNotifications": true,
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "orientation": "portrait",
+  "minSdkVersion": 21
+}

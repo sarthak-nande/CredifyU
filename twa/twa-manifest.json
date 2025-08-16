@@ -1,6 +1,6 @@
 {
-  "packageId": "com.credifyu.app",
-  "host": "https://credify-u-oelj.vercel.app",
+  "packageId": "app.vercel.credify_u_oelj.twa",
+  "host": "credify-u-oelj.vercel.app/",
   "name": "CredifyU",
   "launcherName": "CredifyU",
   "display": "standalone",
@@ -12,22 +12,35 @@
   "navigationDividerColorDark": "#000000",
   "backgroundColor": "#000000",
   "enableNotifications": true,
-  "startUrl": "/",
+  "startUrl": "https://credify-u-oelj.vercel.app/user/select-role",
   "iconUrl": "https://credify-u-oelj.vercel.app/web-app-manifest-512x512.png",
   "maskableIconUrl": "https://credify-u-oelj.vercel.app/web-app-manifest-512x512.png",
-  "monochromeIconUrl": "https://credify-u-oelj.vercel.app/favicon-96x96.png",
+  "monochromeIconUrl": "https://credify-u-oelj.vercel.app/web-app-manifest-512x512.png",
   "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "C:\\Users\\91902\\Desktop\\vc-project\\twa\\android.keystore",
+    "alias": "android"
+  },
   "appVersionName": "1",
   "appVersionCode": 1,
-  "shortcuts": [],
+  "shortcuts": [
+    {
+      "name": "Scan QR Code",
+      "shortName": "Scan",
+      "url": "https://credify-u-oelj.vercel.app/student/scanner",
+      "chosenIconUrl": "https://credify-u-oelj.vercel.app/favicon-96x96.png"
+    },
+    {
+      "name": "Dashboard",
+      "shortName": "Dashboard",
+      "url": "https://credify-u-oelj.vercel.app/student/dashboard",
+      "chosenIconUrl": "https://credify-u-oelj.vercel.app/favicon-96x96.png"
+    }
+  ],
   "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://credify-u-oelj.vercel.app/site.webmanifest",
   "fallbackType": "customtabs",
-  "features": {
-    "locationDelegation": {
-      "enabled": false
-    }
-  },
+  "features": {},
   "alphaDependencies": {
     "enabled": false
   },
