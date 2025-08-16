@@ -1,0 +1,47 @@
+{
+  "packageId": "com.credifyu.app",
+  "host": "https://credify-u-oelj.vercel.app",
+  "name": "CredifyU",
+  "launcherName": "CredifyU",
+  "display": "standalone",
+  "themeColor": "#000000",
+  "themeColorDark": "#000000",
+  "navigationColor": "#000000",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
+  "backgroundColor": "#000000",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "https://credify-u-oelj.vercel.app/web-app-manifest-512x512.png",
+  "maskableIconUrl": "https://credify-u-oelj.vercel.app/web-app-manifest-512x512.png",
+  "monochromeIconUrl": "https://credify-u-oelj.vercel.app/favicon-96x96.png",
+  "splashScreenFadeOutDuration": 300,
+  "appVersionName": "1",
+  "appVersionCode": 1,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://credify-u-oelj.vercel.app/site.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {
+    "locationDelegation": {
+      "enabled": false
+    }
+  },
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://credify-u-oelj.vercel.app/",
+  "minSdkVersion": 21,
+  "orientation": "default",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "protocolHandlers": [],
+  "fileHandlers": [],
+  "launchHandlerClientMode": "",
+  "appVersion": "1"
+}

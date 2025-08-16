@@ -18,6 +18,8 @@ export default function HomeScreen({
   const navigate = useNavigate();
   const [showChangeRoleDialog, setShowChangeRoleDialog] = useState(false);
 
+  const userRole = localStorage.getItem('role');
+
   const handleChangeRole = () => {
     setShowChangeRoleDialog(true);
   };
@@ -79,14 +81,18 @@ export default function HomeScreen({
           <Hero roleName={roleName} />
 
           <div className="mt-6 grid gap-4 md:grid-cols-2">
-            <ActionTile
-              title="Your Data"
-              description="View and manage your identity documents"
-              icon={Database}
-              onClick={() => {
-                navigate("/student/saved-info");
-              }}
-            />
+            {
+              role === "student" && (
+                <ActionTile
+                  title="Your Data"
+                  description="View and manage your identity documents"
+                  icon={Database}
+                  onClick={() => {
+                    navigate("/student/saved-info");
+                  }}
+                />
+              )
+            }
             
             <ActionTile
               title="Scan QR"

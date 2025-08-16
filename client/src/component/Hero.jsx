@@ -30,14 +30,14 @@ export default function Hero({ roleName }) {
           Secure access to your digital identity
         </CardDescription>
       </CardHeader>
-      <CardContent className="grid gap-3 p-5 pt-0 md:p-6 md:pt-0">
+      {roleName === "Student" && <CardContent className="grid gap-3 p-5 pt-0 md:p-6 md:pt-0">
         <div className="flex items-center justify-between rounded-xl bg-white/10 px-4 py-3">
           <span className="text-sm text-zinc-200">
             {credentialCount === 1 ? 'Verified credential' : 'Verified credentials'}
           </span>
           <span className="font-semibold tracking-tight">{credentialCount}</span>
         </div>
-      </CardContent>
+      </CardContent>}
     </Card>
   )
 }

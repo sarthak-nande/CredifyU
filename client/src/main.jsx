@@ -24,6 +24,7 @@ import UserRole from './pages/UserRole';
 import UserDashboard from './pages/UserDashboard';
 import DashboardContent from './component/DashboardContent';
 import OTPVerification from './pages/OTPVerification';
+import LandingPage from './pages/LandingPage';
 
 const router = createBrowserRouter([
   {
@@ -32,7 +33,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: '/',
-        element: <Home />,
+        element: <LandingPage />,
       },
       {
         path: '/college/signup',

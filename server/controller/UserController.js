@@ -6,6 +6,8 @@ import { generateKeys } from "../middleware/keysGenaratator.js";
 import keys from "../model/keys.js";
 import { encryptText } from "../middleware/crpytoGenarator.js";
 import { sendOTP, verifyOTP } from "../middleware/otpGenerator.js";
+import { sendQRCode } from "../middleware/qrSender.js";
+import { sendBulkQRCodes } from "../middleware/bulkQrSender.js";
 
 async function GenerateAccessTokenAndRefreshToken(userId) {
     try {
@@ -410,4 +412,57 @@ async function VerifyOTP(req, res) {
     }
 }
 
-export { SignUp, CompleteSignup, LogIn, GetUser, RefreshAccessToken, SaveUserDetails, CollegeNames, SendOTP, VerifyOTP };
+// Send QR Code to email (single student)
+async function SendQRCode(req, res) {
+    try {
+        const { email, qrData } = req.body;
+
+        if (!email || !qrData) {
+            return res.status(400).json({ message: "Email and QR data are required!" });
+        }
+
+        await sendQRCode(email, qrData);
+        return res.status(200).json({ message: "QR code sent successfully to your email" });
+
+    } catch (error) {
+        console.log("Error Occurred While Sending QR Code", error);
+        return res.status(500).json({
+            message: "Failed to send QR code. Please try again."
+        });
+    }
+}
+
+// Send QR Codes to multiple students
+async function SendBulkQRCodes(req, res) {
+    try {
+        const { students } = req.body;
+
+        if (!students || !Array.isArray(students) || students.length === 0) {
+            return res.status(400).json({ message: "Students array is required and must not be empty!" });
+        }
+
+        // Validate each student object
+        for (const student of students) {
+            if (!student.email || !student.qrData) {
+                return res.status(400).json({ 
+                    message: "Each student must have email and qrData fields!" 
+                });
+            }
+        }
+
+        const result = await sendBulkQRCodes(students);
+        
+        return res.status(200).json({ 
+            message: `QR codes sent successfully! ${result.successful} successful, ${result.failed} failed.`,
+            ...result
+        });
+
+    } catch (error) {
+        console.log("Error Occurred While Sending Bulk QR Codes", error);
+        return res.status(500).json({
+            message: "Failed to send QR codes. Please try again."
+        });
+    }
+}
+
+export { SignUp, CompleteSignup, LogIn, GetUser, RefreshAccessToken, SaveUserDetails, CollegeNames, SendOTP, VerifyOTP, SendQRCode, SendBulkQRCodes };

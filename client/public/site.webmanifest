@@ -1,21 +1,82 @@
 {
-  "name": "MyWebSite",
-  "short_name": "MySite",
+  "name": "CredifyU - Digital Identity Platform",
+  "short_name": "CredifyU",
+  "description": "Secure digital identity platform for students, colleges, and authorities with QR-based verification",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#000000",
+  "background_color": "#000000",
+  "categories": ["education", "productivity", "business"],
+  "lang": "en",
+  "dir": "ltr",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     },
     {
       "src": "/web-app-manifest-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
     }
   ],
-  "theme_color": "#ffffff",
-  "background_color": "#ffffff",
-  "display": "standalone"
+  "screenshots": [
+    {
+      "src": "/desktop-preview.svg",
+      "sizes": "960x640",
+      "type": "image/svg+xml",
+      "platform": "wide",
+      "label": "CredifyU Desktop Interface"
+    },
+    {
+      "src": "/mobile-preview.svg",
+      "sizes": "420x640",
+      "type": "image/svg+xml",
+      "platform": "narrow",
+      "label": "CredifyU Mobile Interface"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Scan QR Code",
+      "short_name": "Scan",
+      "description": "Quick QR code scanning",
+      "url": "/student/scanner",
+      "icons": [
+        {
+          "src": "/favicon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Access your dashboard",
+      "url": "/student/dashboard",
+      "icons": [
+        {
+          "src": "/favicon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
 }

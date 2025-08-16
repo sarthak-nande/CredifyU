@@ -1,0 +1,146 @@
+<svg width="960" height="640" viewBox="0 0 960 640" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Desktop Browser Frame -->
+  <rect width="960" height="640" rx="12" fill="#f5f5f5"/>
+  
+  <!-- Browser Top Bar -->
+  <rect width="960" height="40" rx="12" fill="#e5e5e5"/>
+  <rect x="12" y="12" width="12" height="12" rx="6" fill="#ff5f57"/>
+  <rect x="32" y="12" width="12" height="12" rx="6" fill="#ffbd2e"/>
+  <rect x="52" y="12" width="12" height="12" rx="6" fill="#28ca42"/>
+  
+  <!-- URL Bar -->
+  <rect x="100" y="8" width="760" height="24" rx="12" fill="#ffffff" stroke="#d1d5db"/>
+  <text x="120" y="24" font-family="monospace" font-size="12" fill="#6b7280">https://credifyu.com</text>
+  
+  <!-- Main App Content -->
+  <rect x="0" y="40" width="960" height="600" fill="white"/>
+  
+  <!-- Header -->
+  <rect x="0" y="40" width="960" height="60" fill="white" stroke="#e5e7eb"/>
+  
+  <!-- Logo and Brand -->
+  <rect x="40" y="58" width="24" height="24" rx="6" fill="black"/>
+  <text x="76" y="76" font-family="system-ui" font-size="16" font-weight="600" fill="black">CredifyU</text>
+  <rect x="140" y="62" width="32" height="16" rx="8" fill="transparent" stroke="black"/>
+  <text x="148" y="72" font-family="system-ui" font-size="10" fill="black">Beta</text>
+  
+  <!-- Navigation -->
+  <text x="700" y="76" font-family="system-ui" font-size="14" fill="#6b7280">Features</text>
+  <text x="770" y="76" font-family="system-ui" font-size="14" fill="#6b7280">How it works</text>
+  <text x="860" y="76" font-family="system-ui" font-size="14" fill="#6b7280">FAQ</text>
+  
+  <!-- Main Content Area -->
+  <rect x="0" y="100" width="960" height="540" fill="black"/>
+  
+  <!-- Hero Section -->
+  <g transform="translate(120, 150)">
+    <!-- Left Side Content -->
+    <rect x="0" y="0" width="100" height="20" rx="10" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.2)"/>
+    <circle cx="12" cy="10" r="3" fill="white"/>
+    <text x="24" y="14" font-family="system-ui" font-size="10" fill="white">Privacy-first digital identity</text>
+    
+    <!-- Main Heading -->
+    <text x="0" y="60" font-family="system-ui" font-size="28" font-weight="600" fill="white">Own your digital student</text>
+    <text x="0" y="90" font-family="system-ui" font-size="28" font-weight="600" fill="white">identity with CredifyU</text>
+    
+    <!-- Description -->
+    <text x="0" y="120" font-family="system-ui" font-size="14" fill="#d1d5db">Store verified credentials, share via secure QR, and streamline</text>
+    <text x="0" y="140" font-family="system-ui" font-size="14" fill="#d1d5db">verification between Students, Colleges, and Third Party Authorities.</text>
+    
+    <!-- Buttons -->
+    <rect x="0" y="170" width="100" height="36" rx="18" fill="white"/>
+    <text x="12" y="192" font-family="system-ui" font-size="14" font-weight="500" fill="black">Open App</text>
+    
+    <rect x="120" y="170" width="120" height="36" rx="18" fill="transparent" stroke="white"/>
+    <text x="132" y="192" font-family="system-ui" font-size="14" fill="white">Explore features</text>
+    
+    <!-- Feature List -->
+    <g transform="translate(0, 230)">
+      <circle cx="6" cy="6" r="2" fill="white"/>
+      <text x="16" y="10" font-family="system-ui" font-size="12" fill="#d1d5db">No color distractions — crisp black &amp; white UI</text>
+      
+      <circle cx="6" cy="26" r="2" fill="white"/>
+      <text x="16" y="30" font-family="system-ui" font-size="12" fill="#d1d5db">QR-based sharing and verification</text>
+      
+      <circle cx="250" cy="6" r="2" fill="white"/>
+      <text x="260" y="10" font-family="system-ui" font-size="12" fill="#d1d5db">Role-based access: Student, College, Authority</text>
+      
+      <circle cx="250" cy="26" r="2" fill="white"/>
+      <text x="260" y="30" font-family="system-ui" font-size="12" fill="#d1d5db">Built for mobile and desktop (PWA-ready)</text>
+    </g>
+  </g>
+  
+  <!-- Right Side - App Mockup -->
+  <g transform="translate(520, 150)">
+    <rect x="0" y="0" width="320" height="200" rx="16" fill="white" stroke="rgba(255,255,255,0.2)"/>
+    
+    <!-- App Header -->
+    <rect x="0" y="0" width="320" height="50" rx="16" fill="#f9fafb"/>
+    <rect x="16" y="16" width="18" height="18" rx="4" fill="black"/>
+    <text x="42" y="30" font-family="system-ui" font-size="14" font-weight="600" fill="black">CredifyU Dashboard</text>
+    
+    <!-- Role Selection Cards -->
+    <rect x="20" y="70" width="80" height="60" rx="8" fill="#f3f4f6" stroke="#e5e7eb"/>
+    <rect x="28" y="82" width="16" height="16" rx="4" fill="black"/>
+    <text x="28" y="110" font-family="system-ui" font-size="11" font-weight="500" fill="black">Student</text>
+    
+    <rect x="120" y="70" width="80" height="60" rx="8" fill="#f3f4f6" stroke="#e5e7eb"/>
+    <rect x="128" y="82" width="16" height="16" rx="4" fill="black"/>
+    <text x="128" y="110" font-family="system-ui" font-size="11" font-weight="500" fill="black">College</text>
+    
+    <rect x="220" y="70" width="80" height="60" rx="8" fill="#f3f4f6" stroke="#e5e7eb"/>
+    <rect x="228" y="82" width="16" height="16" rx="4" fill="black"/>
+    <text x="228" y="110" font-family="system-ui" font-size="11" font-weight="500" fill="black">Authority</text>
+    
+    <!-- QR Code Preview -->
+    <rect x="130" y="150" width="60" height="60" rx="4" fill="white" stroke="#e5e7eb"/>
+    <g transform="translate(135, 155)">
+      <!-- Simple QR pattern -->
+      <rect x="0" y="0" width="6" height="6" fill="black"/>
+      <rect x="12" y="0" width="6" height="6" fill="black"/>
+      <rect x="24" y="0" width="6" height="6" fill="black"/>
+      <rect x="36" y="0" width="6" height="6" fill="black"/>
+      <rect x="42" y="0" width="6" height="6" fill="black"/>
+      
+      <rect x="0" y="6" width="6" height="6" fill="black"/>
+      <rect x="42" y="6" width="6" height="6" fill="black"/>
+      
+      <rect x="0" y="12" width="6" height="6" fill="black"/>
+      <rect x="12" y="12" width="6" height="6" fill="black"/>
+      <rect x="24" y="12" width="6" height="6" fill="black"/>
+      <rect x="42" y="12" width="6" height="6" fill="black"/>
+      
+      <rect x="0" y="18" width="6" height="6" fill="black"/>
+      <rect x="42" y="18" width="6" height="6" fill="black"/>
+      
+      <rect x="0" y="24" width="6" height="6" fill="black"/>
+      <rect x="12" y="24" width="6" height="6" fill="black"/>
+      <rect x="24" y="24" width="6" height="6" fill="black"/>
+      <rect x="36" y="24" width="6" height="6" fill="black"/>
+      <rect x="42" y="24" width="6" height="6" fill="black"/>
+      
+      <rect x="12" y="30" width="6" height="6" fill="black"/>
+      <rect x="30" y="30" width="6" height="6" fill="black"/>
+      
+      <rect x="0" y="36" width="6" height="6" fill="black"/>
+      <rect x="12" y="36" width="6" height="6" fill="black"/>
+      <rect x="24" y="36" width="6" height="6" fill="black"/>
+      <rect x="36" y="36" width="6" height="6" fill="black"/>
+      <rect x="42" y="36" width="6" height="6" fill="black"/>
+      
+      <rect x="0" y="42" width="6" height="6" fill="black"/>
+      <rect x="42" y="42" width="6" height="6" fill="black"/>
+      
+      <rect x="0" y="48" width="6" height="6" fill="black"/>
+      <rect x="12" y="48" width="6" height="6" fill="black"/>
+      <rect x="24" y="48" width="6" height="6" fill="black"/>
+      <rect x="42" y="48" width="6" height="6" fill="black"/>
+    </g>
+  </g>
+  
+  <!-- Preview Label -->
+  <g transform="translate(780, 340) rotate(6)">
+    <rect x="0" y="0" width="60" height="30" rx="6" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.2)"/>
+    <text x="18" y="20" font-family="system-ui" font-size="10" fill="#d1d5db">Preview</text>
+  </g>
+</svg>

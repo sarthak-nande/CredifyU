@@ -1,0 +1,50 @@
+{
+  "packageId": "com.credifyu.app.dev",
+  "host": "http://localhost:5173",
+  "name": "CredifyU Dev",
+  "launcherName": "CredifyU Dev",
+  "display": "standalone",
+  "orientation": "portrait",
+  "themeColor": "#000000",
+  "backgroundColor": "#000000",
+  "startUrl": "/",
+  "iconUrl": "/web-app-manifest-512x512.png",
+  "maskableIconUrl": "/web-app-manifest-512x512.png",
+  "monochromeIconUrl": "/favicon-96x96.png",
+  "splashScreenColor": "#000000",
+  "splashScreenFadeOutDuration": 300,
+  "enableNotifications": true,
+  "isChromeOSOnly": false,
+  "enableSiteSettingsShortcut": true,
+  "features": {
+    "locationDelegation": {
+      "enabled": false
+    },
+    "playBilling": {
+      "enabled": false
+    }
+  },
+  "shortcuts": [
+    {
+      "name": "Scan QR Code",
+      "short_name": "Scan",
+      "url": "/student/scanner",
+      "icon": "/favicon-96x96.png"
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard", 
+      "url": "/student/dashboard",
+      "icon": "/favicon-96x96.png"
+    }
+  ],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "fallbackType": "customtabs",
+  "enableUrlBarHiding": true,
+  "isMetaQuest": false,
+  "minSdkVersion": 19,
+  "generatorApp": "bubblewrap-cli"
+}

@@ -8,7 +8,9 @@ import {
   SaveUserDetails,
   CollegeNames,
   SendOTP,
-  VerifyOTP
+  VerifyOTP,
+  SendQRCode,
+  SendBulkQRCodes
 } from '../controller/UserController.js';
 
 const router = express.Router();
@@ -42,5 +44,9 @@ router.get('/college-names', CollegeNames);
 router.post('/send-otp', SendOTP);
 
 router.post('/verify-otp', VerifyOTP);
+
+router.post('/send-qr-code', SendQRCode);
+
+router.post('/send-bulk-qr-codes', SendBulkQRCodes);
 
 export default router;

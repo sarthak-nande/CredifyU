@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Input } from "@/components/ui/input"
-import { QrCode, CheckCircle, RotateCcw, ArrowRight, User, Mail, Phone, Calendar, GraduationCap, AlertCircle, Camera, ForwardIcon } from 'lucide-react'
+import { QrCode, CheckCircle, RotateCcw, ArrowRight, User, Mail, Phone, Calendar, GraduationCap, AlertCircle, Camera, ForwardIcon, Upload, FileImage } from 'lucide-react'
 import api from "@/utils/api"
 import { QRCodeCanvas } from "qrcode.react"
 import { set } from "lodash"
@@ -15,6 +15,7 @@ import { useSelector } from "react-redux"
 import CollegeSelect from "./CollegeSelect"
 import { useNavigate } from "react-router-dom"
 import SuccessCard from "./SuccessCard"
+import Header from "./Header"
 
 export default function JWTQRScanner() {
   const qrRef = useRef(null);
@@ -41,8 +42,15 @@ export default function JWTQRScanner() {
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes
   const [canResendOTP, setCanResendOTP] = useState(false);
   const [tempPayload, setTempPayload] = useState(null); // Store payload until OTP verification
+  const [isUploadMode, setIsUploadMode] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState(null);
+  const [isProcessingUpload, setIsProcessingUpload] = useState(false);
+  const fileInputRef = useRef(null);
 
   const myCollegeId = useSelector((state) => state.college.collegeId);
+  const user = useSelector((state) => state.user.user);
+
+  const role = localStorage.getItem("role");
 
   // Function to get students array from localStorage
   const getStudentsFromStorage = () => {
@@ -244,13 +252,23 @@ export default function JWTQRScanner() {
         setTempPayload(verifiedPayload);
         setMyToken(token);
         
-        // Extract email and send OTP
-        const email = verifiedPayload.email;
-        if (email) {
-          setStudentEmail(email);
-          await sendOTPToStudent(email);
+        // Check if user is authority or third party authority - skip OTP verification
+        if (role === "authority" || role === "third-party-authority") {
+          // Direct verification for authority users - NO DATA SAVING
+          setPayload(verifiedPayload);
+          setIsVerified(true);
+          setTempPayload(null);
+          setError("");
+          console.log("Authority user verification - OTP skipped, data not saved");
         } else {
-          setError("No email found in student data");
+          // Extract email and send OTP for other users
+          const email = verifiedPayload.email;
+          if (email) {
+            setStudentEmail(email);
+            await sendOTPToStudent(email);
+          } else {
+            setError("No email found in student data");
+          }
         }
       }
     } catch (err) {
@@ -259,6 +277,116 @@ export default function JWTQRScanner() {
         setError("Invalid or tampered token");
       }
     }
+  };
+
+  // Function to handle QR image upload
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      // Show preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setUploadedImage(e.target.result);
+      };
+      reader.readAsDataURL(file);
+      
+      // Scan the actual file
+      scanUploadedImage(file);
+    } else {
+      setError("Please select a valid image file");
+    }
+  };
+
+  // Function to scan uploaded QR image
+  const scanUploadedImage = async (file) => {
+    try {
+      setError("");
+      setIsProcessingUpload(true);
+      
+      // Use Html5Qrcode to scan the file directly
+      const html5QrCode = new Html5Qrcode("temp-scanner");
+      
+      try {
+        const result = await html5QrCode.scanFile(file, true);
+        
+        if (result && mountedRef.current) {
+          console.log("QR Code detected:", result);
+          setMyToken(result);
+          localStorage.setItem("token", result);
+          setUploadedImage(null);
+          setIsUploadMode(false);
+          setIsProcessingUpload(false);
+          verifyToken(result);
+          return;
+        }
+      } catch (scanError) {
+        console.error("QR scan failed:", scanError);
+        
+        // Fallback: Try with different approach using canvas
+        try {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          const img = new Image();
+          
+          await new Promise((resolve, reject) => {
+            img.onload = () => {
+              // Scale image for better detection
+              const maxSize = 800;
+              let { width, height } = img;
+              
+              if (width > height && width > maxSize) {
+                height = (height * maxSize) / width;
+                width = maxSize;
+              } else if (height > maxSize) {
+                width = (width * maxSize) / height;
+                height = maxSize;
+              }
+              
+              canvas.width = width;
+              canvas.height = height;
+              ctx.drawImage(img, 0, 0, width, height);
+              
+              // Convert canvas to blob and try scanning again
+              canvas.toBlob(async (blob) => {
+                try {
+                  const resultFallback = await html5QrCode.scanFile(blob, true);
+                  if (resultFallback && mountedRef.current) {
+                    console.log("QR Code detected with fallback:", resultFallback);
+                    setMyToken(resultFallback);
+                    localStorage.setItem("token", resultFallback);
+                    setUploadedImage(null);
+                    setIsUploadMode(false);
+                    setIsProcessingUpload(false);
+                    verifyToken(resultFallback);
+                    resolve();
+                  } else {
+                    reject(new Error("No QR code found"));
+                  }
+                } catch (fallbackError) {
+                  reject(fallbackError);
+                }
+              }, 'image/jpeg', 0.9);
+            };
+            
+            img.onerror = reject;
+            img.src = URL.createObjectURL(file);
+          });
+        } catch (fallbackError) {
+          console.error("Fallback scan also failed:", fallbackError);
+          setError("Could not detect QR code in the uploaded image. Please try:\n• Using a clearer image\n• Ensuring the QR code is fully visible\n• Uploading a different image format");
+          setIsProcessingUpload(false);
+        }
+      }
+    } catch (error) {
+      console.error("Image upload error:", error);
+      setError("Error processing uploaded image");
+      setIsProcessingUpload(false);
+    }
+  };
+
+  // Function to trigger file input
+  const triggerFileUpload = () => {
+    fileInputRef.current?.click();
   };
 
   const handleRescan = () => {
@@ -272,6 +400,9 @@ export default function JWTQRScanner() {
     setTimeLeft(300);
     setCanResendOTP(false);
     setError("");
+    setIsUploadMode(false);
+    setUploadedImage(null);
+    setIsProcessingUpload(false);
     cleanupScanner();
     setIsScanning(true);
   };
@@ -340,11 +471,16 @@ export default function JWTQRScanner() {
         // OTP verified, now show student info
         setPayload(tempPayload);
         
-        // Save to array
-        const savedStudent = saveStudentToArray(tempPayload, myToken);
-        
-        // Keep old localStorage for backward compatibility
-        localStorage.setItem("student", JSON.stringify(tempPayload));
+        // Only save data if user is not an authority user
+        if (!(role === "authority" || role === "third-party-authority")) {
+          // Save to array
+          const savedStudent = saveStudentToArray(tempPayload, myToken);
+          
+          // Keep old localStorage for backward compatibility
+          localStorage.setItem("student", JSON.stringify(tempPayload));
+        } else {
+          console.log("Authority user - data not saved");
+        }
         
         setIsVerified(true);
         setRequiresOTP(false);
@@ -531,20 +667,33 @@ export default function JWTQRScanner() {
             <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
               <CardTitle className="flex items-center gap-2 text-xl">
                 <GraduationCap className="h-6 w-6" />
-                Student Identity Card
+                {(role === "authority" || role === "third-party-authority") ? "Credential Verification" : "Student Identity Card"}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-              <div className="flex items-center justify-center mb-4">
-                <QRCodeCanvas value={myToken} size={256} />
-              </div>
-              <Separator />
+              {/* Only show QR code for non-authority users */}
+              {!(role === "authority" || role === "third-party-authority") && (
+                <>
+                  <div className="flex items-center justify-center mb-4">
+                    <QRCodeCanvas value={myToken} size={256} />
+                  </div>
+                  <Separator />
+                </>
+              )}
+              
               <div className="space-y-4">
                 <div className="text-center">
                   <h2 className="text-2xl font-bold text-gray-800">{payload?.name}</h2>
                   <Badge variant="secondary" className="mt-1">
                     {payload?.branch} - {payload?.year}
                   </Badge>
+                  {(role === "authority" || role === "third-party-authority") && (
+                    <div className="mt-2">
+                      <Badge variant="outline" className="text-green-700 border-green-300 bg-green-50">
+                        ✅ Verified Credential
+                      </Badge>
+                    </div>
+                  )}
                 </div>
                 <Separator />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -577,28 +726,34 @@ export default function JWTQRScanner() {
                     </div>
                   </div>
                 </div>
-                <Separator />
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h3 className="font-semibold text-gray-700 mb-2">JWT Information</h3>
-                  <div className="grid grid-cols-1 gap-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Issuer:</span>
-                      <span className="font-mono text-xs">{payload?.iss}</span>
+                
+                {/* Only show JWT info for non-authority users */}
+                {!(role === "authority" || role === "third-party-authority") && (
+                  <>
+                    <Separator />
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <h3 className="font-semibold text-gray-700 mb-2">JWT Information</h3>
+                      <div className="grid grid-cols-1 gap-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Issuer:</span>
+                          <span className="font-mono text-xs">{payload?.iss}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Audience:</span>
+                          <span className="font-mono text-xs">{payload?.aud}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Issued At:</span>
+                          <span>{payload ? formatDate(payload.iat) : "N/A"}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Scanned At:</span>
+                          <span>{new Date().toLocaleString()}</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Audience:</span>
-                      <span className="font-mono text-xs">{payload?.aud}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Issued At:</span>
-                      <span>{payload ? formatDate(payload.iat) : "N/A"}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Scanned At:</span>
-                      <span>{new Date().toLocaleString()}</span>
-                    </div>
-                  </div>
-                </div>
+                  </>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -607,7 +762,8 @@ export default function JWTQRScanner() {
               <RotateCcw className="h-4 w-4 mr-2" />
               Rescan
             </Button>
-            <SuccessCard />
+            {/* Only show save option for non-authority users */}
+            {!(role === "authority" || role === "third-party-authority") && <SuccessCard />}
           </div>
         </div>
       </div>
@@ -616,8 +772,13 @@ export default function JWTQRScanner() {
 
   return (
     myCollegeId ? (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-        <Card className="w-full max-w-md">
+      <div>
+        {/* Show Header only for non-authority users */}
+        {!(role === "authority" || role === "third-party-authority") && (
+          <Header title="CredifyU" subtitle="Store and verify student identities" />
+        )}
+        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+          <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <CardTitle className="flex items-center justify-center gap-2 text-2xl">
               <QrCode className="h-6 w-6" />
@@ -641,6 +802,52 @@ export default function JWTQRScanner() {
               </div>
             )}
             
+            {/* Upload Image Preview */}
+            {uploadedImage && (
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex items-center gap-2 mb-3">
+                  <FileImage className="h-5 w-5 text-blue-600" />
+                  <span className="font-medium text-gray-700">Uploaded QR Image</span>
+                </div>
+                <div className="relative w-full max-w-xs mx-auto">
+                  <img 
+                    src={uploadedImage} 
+                    alt="Uploaded QR Code" 
+                    className="w-full h-auto rounded-lg border border-gray-200"
+                  />
+                  <Button
+                    onClick={() => {
+                      setUploadedImage(null);
+                      setIsUploadMode(false);
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="absolute top-2 right-2 h-8 w-8 p-0"
+                  >
+                    ✕
+                  </Button>
+                </div>
+                <p className="text-sm text-gray-600 text-center mt-2">
+                  {isProcessingUpload ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                      Scanning QR code from image...
+                    </span>
+                  ) : (
+                    "QR code uploaded successfully"
+                  )}
+                </p>
+                {error && (
+                  <Alert className="mt-2">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription className="text-sm">
+                      {error}
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </div>
+            )}
+            
             <div className="flex justify-center">
               <div className="relative w-full max-w-sm sm:w-80 h-80 mx-auto">
                 <div
@@ -653,11 +860,12 @@ export default function JWTQRScanner() {
                     justifyContent: 'center'
                   }}
                 >
-                  {!isScanning && (
+                  {!isScanning && !uploadedImage && (
                     <div className="absolute inset-0 flex items-center justify-center bg-gray-50 pointer-events-none">
                       <div className="text-center">
                         <Camera className="h-16 w-16 text-gray-400 mx-auto mb-2" />
                         <p className="text-sm text-gray-500">Camera will appear here</p>
+                        <p className="text-xs text-gray-400 mt-1">Or upload a QR image below</p>
                       </div>
                     </div>
                   )}
@@ -676,28 +884,56 @@ export default function JWTQRScanner() {
                 className="w-full"
                 size="lg"
               >
-                {isScanning ? "Scanning..." : "Start Scan"}
+                {isScanning ? "Scanning..." : "Start Camera Scan"}
               </Button>
-              {isScanning && (
+              
+              <div className="flex gap-2">
                 <Button
-                  onClick={async () => {
-                    await cleanupScanner();
-                    setIsScanning(false);
-                  }}
+                  onClick={triggerFileUpload}
+                  disabled={isScanning || isProcessingUpload}
                   variant="outline"
-                  className="w-full"
+                  className="flex-1"
                   size="lg"
                 >
-                  Stop Scan
+                  <Upload className="h-4 w-4 mr-2" />
+                  {isProcessingUpload ? "Processing..." : "Upload QR Image"}
                 </Button>
-              )}
+                
+                {isScanning && (
+                  <Button
+                    onClick={async () => {
+                      await cleanupScanner();
+                      setIsScanning(false);
+                    }}
+                    variant="outline"
+                    className="flex-1"
+                    size="lg"
+                  >
+                    Stop Scan
+                  </Button>
+                )}
+              </div>
+              
               <Button onClick={handleRescan} variant="secondary" className="w-full" size="lg">
                 <RotateCcw className="h-4 w-4 mr-2" />
                 Rescan
               </Button>
+              
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+              
+              {/* Hidden temporary scanner for image processing */}
+              <div id="temp-scanner" style={{ display: 'none' }}></div>
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
     ) : (navigate("/student/college-name"))
   );

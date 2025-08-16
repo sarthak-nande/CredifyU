@@ -55,6 +55,7 @@ export function StudentTable() {
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
   const [qrToken, setQrToken] = useState("");
   const [selectedStudentName, setSelectedStudentName] = useState("");
+  const [sendingQR, setSendingQR] = useState(false);
 
   const fetchStudents = async () => {
     try {
@@ -94,9 +95,61 @@ export function StudentTable() {
     }
   };
 
-  const handleSendQR = () => {
-    alert("Send QR to: " + selectedIds.join(", "));
-    // You can enhance this logic to send QR via email/notification
+  const handleSendQR = async () => {
+    if (selectedIds.length === 0) {
+      toast.error("Please select students to send QR codes");
+      return;
+    }
+
+    setSendingQR(true);
+
+    try {
+      // Get selected students data
+      const selectedStudents = students.filter(student => 
+        selectedIds.includes(student._id)
+      );
+
+      // Prepare data for bulk API
+      const studentsData = selectedStudents.map(student => ({
+        email: student.email,
+        qrData: student.token
+      }));
+
+      // Validate that all students have email and token
+      const invalidStudents = studentsData.filter(s => !s.email || !s.qrData);
+      if (invalidStudents.length > 0) {
+        toast.error("Some students are missing email or token data");
+        setSendingQR(false);
+        return;
+      }
+
+      // Call bulk QR code API
+      const response = await api.post("/api/send-bulk-qr-codes", {
+        students: studentsData
+      }, {
+        withCredentials: true
+      });
+
+      const result = response.data;
+      
+      if (result.successful > 0) {
+        toast.success(`QR codes sent successfully to ${result.successful} students!`);
+      }
+      
+      if (result.failed > 0) {
+        toast.warning(`Failed to send to ${result.failed} students. Check console for details.`);
+        console.log("Failed emails:", result.errors);
+      }
+
+      // Clear selection after successful send
+      setSelectedIds([]);
+
+    } catch (error) {
+      console.error("Error sending QR codes:", error);
+      toast.error("Failed to send QR codes. Please try again.");
+    } finally {
+      setSendingQR(false);
+    }
   };
 
   const handleEdit = (studentId) => {
@@ -163,11 +216,11 @@ export function StudentTable() {
           </Button>
           <Button
             variant="default"
-            disabled={selectedIds.length === 0}
+            disabled={selectedIds.length === 0 || sendingQR}
             onClick={handleSendQR}
           >
             <SendIcon className="mr-2 h-4 w-4" />
-            Send QR
+            {sendingQR ? "Sending..." : "Send QR"}
           </Button>
         </div>
       </div>

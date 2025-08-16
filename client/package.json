@@ -1,15 +1,24 @@
 {
-  "name": "client",
+  "name": "credifyu-client",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:pwa": "vite build && npm run sw:generate",
+    "sw:generate": "workbox generateSW workbox-config.js",
+    "twa:install-cli": "npm install -g @bubblewrap/cli",
+    "twa:init": "cd ../twa && npx @bubblewrap/cli init --manifest=twa-manifest.json",
+    "twa:build": "cd ../twa && npx @bubblewrap/cli build",
+    "twa:build:prod": "cd ../twa && npx @bubblewrap/cli build --signingKeyPath=./credifyu-release-key.keystore --signingKeyAlias=credifyu-key",
+    "twa:install": "cd ../twa && npx @bubblewrap/cli install",
+    "twa:setup": "npm run twa:init && npm run twa:build && npm run twa:install"
   },
   "dependencies": {
+    "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-checkbox": "^1.3.2",
@@ -26,6 +35,7 @@
     "@tanstack/react-table": "^8.21.3",
     "@yudiel/react-qr-scanner": "^2.3.1",
     "axios": "^1.11.0",
+    "bubblewrap": "^0.2.0",
     "checkbox": "^0.0.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -47,6 +57,7 @@
     "vite-plugin-pwa": "^1.0.1"
   },
   "devDependencies": {
+    "@bubblewrap/cli": "^1.23.0",
     "@eslint/js": "^9.30.1",
     "@tailwindcss/postcss": "^4.1.11",
     "@types/react": "^19.1.8",

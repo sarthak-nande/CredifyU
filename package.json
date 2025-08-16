@@ -1,0 +1,32 @@
+{
+  "name": "credifyu",
+  "version": "1.0.0",
+  "description": "CredifyU - QR-based Student Verification Platform",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "twa:install": "npm install --save-dev @bubblewrap/cli",
+    "twa:init": "cd twa && npx @bubblewrap/cli init --manifest=twa-manifest.json",
+    "twa:init-dev": "cd twa && npx @bubblewrap/cli init --manifest=twa-manifest-dev.json",
+    "twa:build": "cd twa && npx @bubblewrap/cli build",
+    "twa:build-release": "cd twa && npx @bubblewrap/cli build --release",
+    "twa:setup": "npm run twa:install && npm run twa:init && npm run twa:build",
+    "twa:setup-dev": "npm run twa:install && npm run twa:init-dev && npm run twa:build",
+    "client:dev": "cd client && npm run dev",
+    "client:build": "cd client && npm run build",
+    "server:dev": "cd server && npm run dev",
+    "server:start": "cd server && npm start"
+  },
+  "keywords": [
+    "pwa",
+    "twa",
+    "qr-code",
+    "student-verification",
+    "android-app"
+  ],
+  "author": "CredifyU Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@bubblewrap/cli": "^1.23.0"
+  }
+}
