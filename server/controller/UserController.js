@@ -68,8 +68,12 @@ async function CompleteSignup(req, res) {
 
         // Verify OTP first
         const isOTPValid = await verifyOTP(email, otp);
-        if (!isOTPValid) {
-            return res.status(400).json({ message: "Invalid or expired OTP" });
+
+        if (!isOTPValid.success) {
+            return res.status(400).json({ 
+                message: isOTPValid.message,
+                verified: true 
+            });
         }
 
         // Check if user already exists
@@ -90,11 +94,7 @@ async function CompleteSignup(req, res) {
             password: hashPassword
         })
 
-        console.log(newUser);
-
         const getCreatedUser = await UserModel.findById(newUser._id);
-
-        console.log(getCreatedUser);
 
         if (!getCreatedUser) {
             return res.status(400).json({
@@ -162,8 +162,6 @@ async function LogIn(req, res, next) {
             email: email
         });
 
-        console.log(user)
-
         if (!user) {
             return res.status(400).json({
                 message: "User Not Found!"
@@ -201,8 +199,6 @@ async function LogIn(req, res, next) {
 async function GetUser(req, res) {
     try {
         const token = req.cookies.accessToken || req.body?.accessToken;
-
-        console.log(token);
 
         if (!token) {
             res.status(400).json({
@@ -245,11 +241,7 @@ async function RefreshAccessToken(req, res) {
             process.env.REFRESH_TOKEN_SECRET
         )
 
-        console.log("decoded: ", decodedToken);
-
         const user = await UserModel.findById(decodedToken?._id)
-
-        console.log("redess: ", user);
 
         if (!user) {
             res.status(400).json({
@@ -269,7 +261,6 @@ async function RefreshAccessToken(req, res) {
         }
 
         const { accessToken, newRefreshToken } = await generateAccessTokenAndRefreshToken(user._id, user)
-        console.log(accessToken, newRefreshToken);
 
         return res
             .status(200)
@@ -396,22 +387,17 @@ async function VerifyOTP(req, res) {
             return res.status(400).json({ message: "Email and OTP are required!" });
         }
 
-        const isValid = await verifyOTP(email, otp);
-        
-        if (isValid) {
-            await UserModel.findOneAndUpdate(
-                { email: email.toLowerCase() },
-                { isOtpVerified: true },
-                { new: true }
-            );
-            
-            return res.status(200).json({
-                message: "OTP verified successfully",
+        const result = await verifyOTP(email, otp);
+
+
+        if (result.success) {
+            return res.status(200).json({ 
+                message: result.message,
                 verified: true 
             });
         } else {
             return res.status(400).json({ 
-                message: "Invalid or expired OTP",
+                message: result.message,
                 verified: false 
             });
         }

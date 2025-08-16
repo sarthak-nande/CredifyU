@@ -66,7 +66,7 @@ const verifyOTP = async (email, inputOtp) => {
     
     if (otpDoc.otp !== inputOtp) {
       await otpDoc.incrementAttempts();
-      return { success: false, message: `Invalid OTP. ${3 - (otpDoc.attempts + 1)} attempts remaining.` };
+      return { success: false, message: `Invalid OTP. ${3 - (otpDoc.attempts)} attempts remaining.` };
     }
     
     // OTP verified successfully - remove from database
