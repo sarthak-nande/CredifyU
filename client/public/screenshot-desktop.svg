@@ -1,0 +1,76 @@
+<!-- Desktop Screenshot for PWA Install -->
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1920" height="1080" fill="#000000"/>
+  
+  <!-- Header -->
+  <rect x="0" y="0" width="1920" height="80" fill="#111111"/>
+  
+  <!-- CredifyU Logo and Title -->
+  <circle cx="100" cy="40" r="25" fill="none" stroke="#ffffff" stroke-width="2"/>
+  <circle cx="100" cy="40" r="15" fill="none" stroke="#ffffff" stroke-width="1"/>
+  <circle cx="100" cy="40" r="8" fill="#ffffff"/>
+  <text x="140" y="50" fill="#ffffff" font-family="Arial, sans-serif" font-size="24" font-weight="bold">CredifyU Dashboard</text>
+  
+  <!-- Navigation -->
+  <text x="1600" y="50" fill="#ffffff" font-family="Arial, sans-serif" font-size="16">Dashboard</text>
+  <text x="1700" y="50" fill="#ffffff" font-family="Arial, sans-serif" font-size="16">Scanner</text>
+  <text x="1780" y="50" fill="#ffffff" font-family="Arial, sans-serif" font-size="16">Profile</text>
+  
+  <!-- Main Content Area -->
+  <rect x="50" y="120" width="1820" height="900" fill="#1a1a1a" rx="10"/>
+  
+  <!-- Title -->
+  <text x="100" y="180" fill="#ffffff" font-family="Arial, sans-serif" font-size="32" font-weight="bold">Student Verification Dashboard</text>
+  
+  <!-- Stats Cards -->
+  <rect x="100" y="220" width="300" height="150" fill="#2a2a2a" rx="8"/>
+  <text x="120" y="250" fill="#ffffff" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Total Students</text>
+  <text x="120" y="320" fill="#4ade80" font-family="Arial, sans-serif" font-size="36" font-weight="bold">1,247</text>
+  
+  <rect x="450" y="220" width="300" height="150" fill="#2a2a2a" rx="8"/>
+  <text x="470" y="250" fill="#ffffff" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Verified Today</text>
+  <text x="470" y="320" fill="#60a5fa" font-family="Arial, sans-serif" font-size="36" font-weight="bold">89</text>
+  
+  <rect x="800" y="220" width="300" height="150" fill="#2a2a2a" rx="8"/>
+  <text x="820" y="250" fill="#ffffff" font-family="Arial, sans-serif" font-size="16" font-weight="bold">QR Scans</text>
+  <text x="820" y="320" fill="#f59e0b" font-family="Arial, sans-serif" font-size="36" font-weight="bold">342</text>
+  
+  <!-- QR Scanner Preview -->
+  <rect x="1200" y="220" width="600" height="400" fill="#2a2a2a" rx="8"/>
+  <text x="1220" y="250" fill="#ffffff" font-family="Arial, sans-serif" font-size="18" font-weight="bold">QR Scanner</text>
+  
+  <!-- QR Code -->
+  <rect x="1400" y="300" width="200" height="200" fill="#ffffff" rx="4"/>
+  <rect x="1410" y="310" width="20" height="20" fill="#000000"/>
+  <rect x="1440" y="310" width="20" height="20" fill="#000000"/>
+  <rect x="1470" y="310" width="20" height="20" fill="#000000"/>
+  <rect x="1560" y="310" width="20" height="20" fill="#000000"/>
+  <rect x="1410" y="340" width="20" height="20" fill="#000000"/>
+  <rect x="1470" y="340" width="20" height="20" fill="#000000"/>
+  <rect x="1530" y="340" width="20" height="20" fill="#000000"/>
+  <rect x="1560" y="340" width="20" height="20" fill="#000000"/>
+  
+  <!-- Student List -->
+  <rect x="100" y="420" width="1000" height="500" fill="#2a2a2a" rx="8"/>
+  <text x="120" y="450" fill="#ffffff" font-family="Arial, sans-serif" font-size="18" font-weight="bold">Recent Verifications</text>
+  
+  <!-- Student Entries -->
+  <rect x="120" y="480" width="960" height="60" fill="#333333" rx="4"/>
+  <circle cx="150" cy="510" r="20" fill="#4ade80"/>
+  <text x="180" y="505" fill="#ffffff" font-family="Arial, sans-serif" font-size="14">John Doe</text>
+  <text x="180" y="520" fill="#9ca3af" font-family="Arial, sans-serif" font-size="12">Student ID: 2025001</text>
+  <text x="900" y="510" fill="#4ade80" font-family="Arial, sans-serif" font-size="12">Verified</text>
+  
+  <rect x="120" y="560" width="960" height="60" fill="#333333" rx="4"/>
+  <circle cx="150" cy="590" r="20" fill="#4ade80"/>
+  <text x="180" y="585" fill="#ffffff" font-family="Arial, sans-serif" font-size="14">Jane Smith</text>
+  <text x="180" y="600" fill="#9ca3af" font-family="Arial, sans-serif" font-size="12">Student ID: 2025002</text>
+  <text x="900" y="590" fill="#4ade80" font-family="Arial, sans-serif" font-size="12">Verified</text>
+  
+  <rect x="120" y="640" width="960" height="60" fill="#333333" rx="4"/>
+  <circle cx="150" cy="670" r="20" fill="#60a5fa"/>
+  <text x="180" y="665" fill="#ffffff" font-family="Arial, sans-serif" font-size="14">Mike Johnson</text>
+  <text x="180" y="680" fill="#9ca3af" font-family="Arial, sans-serif" font-size="12">Student ID: 2025003</text>
+  <text x="900" y="670" fill="#60a5fa" font-family="Arial, sans-serif" font-size="12">Pending</text>
+</svg>
