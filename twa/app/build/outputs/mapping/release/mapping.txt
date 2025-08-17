@@ -3,8 +3,8 @@
 # min_api: 21
 # common_typos_disable
 # {"id":"com.android.tools.r8.mapping","version":"2.2"}
-# pg_map_id: ae9c4af
-# pg_map_hash: SHA-256 ae9c4af00821f5ef1aab22bd6944da8c22472a712bc044d936f47dd2cf36b865
+# pg_map_id: a120f30
+# pg_map_hash: SHA-256 a120f3077efc8c6d097b013896cc27d82a0f663c136231616ffcfa046cf10e2b
 android.support.customtabs.ICustomTabsCallback -> a.a:
 # {"id":"sourceFile","fileName":"ICustomTabsCallback.java"}
     java.lang.String DESCRIPTOR -> a
@@ -22694,15 +22694,15 @@ androidx.versionedparcelable.VersionedParcelParcel -> androidx.versionedparcelab
     1:6:void writeBoolean(boolean):181:181 -> y
 androidx.versionedparcelable.VersionedParcelable -> H.a:
 # {"id":"sourceFile","fileName":"VersionedParcelable.java"}
-app.vercel.credify_u_oelj.twa.Application -> app.vercel.credify_u_oelj.twa.Application:
+com.credifyu.app.Application -> com.credifyu.app.Application:
 # {"id":"sourceFile","fileName":"Application.java"}
     1:4:void <init>():20:20 -> <init>
     1:4:void onCreate():26:26 -> onCreate
-app.vercel.credify_u_oelj.twa.DelegationService -> app.vercel.credify_u_oelj.twa.DelegationService:
+com.credifyu.app.DelegationService -> com.credifyu.app.DelegationService:
 # {"id":"sourceFile","fileName":"DelegationService.java"}
     1:4:void <init>():5:5 -> <init>
     1:4:void onCreate():9:9 -> onCreate
-app.vercel.credify_u_oelj.twa.LauncherActivity -> app.vercel.credify_u_oelj.twa.LauncherActivity:
+com.credifyu.app.LauncherActivity -> com.credifyu.app.LauncherActivity:
 # {"id":"sourceFile","fileName":"LauncherActivity.java"}
     1:4:void <init>():25:25 -> <init>
     1:5:android.net.Uri getLaunchingUrl():48:48 -> i

@@ -36,7 +36,7 @@ MERGED from [androidx.tracing:tracing:1.0.0] C:\Users\91902\.gradle\caches\8.11.
 MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\91902\.gradle\caches\8.11.1\transforms\09558f1b9b56a339611f1f3ff5685123\transformed\core-runtime-2.2.0\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.annotation:annotation-experimental:1.4.1] C:\Users\91902\.gradle\caches\8.11.1\transforms\7880efad619dc72d569f5e6e2c17444b\transformed\annotation-experimental-1.4.1\AndroidManifest.xml:2:1-7:12
 	package
-		ADDED from C:\Users\91902\Desktop\vc-project\twa\app\src\main\AndroidManifest.xml:23:5-44
+		ADDED from C:\Users\91902\Desktop\vc-project\twa\app\src\main\AndroidManifest.xml:23:5-31
 		INJECTED from C:\Users\91902\Desktop\vc-project\twa\app\src\main\AndroidManifest.xml
 	android:versionName
 		INJECTED from C:\Users\91902\Desktop\vc-project\twa\app\src\main\AndroidManifest.xml
@@ -109,7 +109,7 @@ ADDED from C:\Users\91902\Desktop\vc-project\twa\app\src\main\AndroidManifest.xm
 		ADDED from C:\Users\91902\Desktop\vc-project\twa\app\src\main\AndroidManifest.xml:68:17-50
 	android:name
 		ADDED from C:\Users\91902\Desktop\vc-project\twa\app\src\main\AndroidManifest.xml:67:17-83
-activity#app.vercel.credify_u_oelj.twa.LauncherActivity
+activity#com.credifyu.app.LauncherActivity
 ADDED from C:\Users\91902\Desktop\vc-project\twa\app\src\main\AndroidManifest.xml:72:9-151:20
 	android:label
 		ADDED from C:\Users\91902\Desktop\vc-project\twa\app\src\main\AndroidManifest.xml:74:13-49
@@ -261,7 +261,7 @@ ADDED from C:\Users\91902\Desktop\vc-project\twa\app\src\main\AndroidManifest.xm
 		ADDED from C:\Users\91902\Desktop\vc-project\twa\app\src\main\AndroidManifest.xml:165:17-50
 	android:name
 		ADDED from C:\Users\91902\Desktop\vc-project\twa\app\src\main\AndroidManifest.xml:164:17-67
-service#app.vercel.credify_u_oelj.twa.DelegationService
+service#com.credifyu.app.DelegationService
 ADDED from C:\Users\91902\Desktop\vc-project\twa\app\src\main\AndroidManifest.xml:168:9-183:19
 	android:enabled
 		ADDED from C:\Users\91902\Desktop\vc-project\twa\app\src\main\AndroidManifest.xml:170:13-55
@@ -387,7 +387,7 @@ ADDED from [androidx.core:core:1.13.0] C:\Users\91902\.gradle\caches\8.11.1\tran
 		ADDED from [androidx.core:core:1.13.0] C:\Users\91902\.gradle\caches\8.11.1\transforms\a5429f7b20c607b890f08b5283ad4ec0\transformed\core-1.13.0\AndroidManifest.xml:24:9-44
 	android:name
 		ADDED from [androidx.core:core:1.13.0] C:\Users\91902\.gradle\caches\8.11.1\transforms\a5429f7b20c607b890f08b5283ad4ec0\transformed\core-1.13.0\AndroidManifest.xml:23:9-81
-permission#app.vercel.credify_u_oelj.twa.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+permission#com.credifyu.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
 ADDED from [androidx.core:core:1.13.0] C:\Users\91902\.gradle\caches\8.11.1\transforms\a5429f7b20c607b890f08b5283ad4ec0\transformed\core-1.13.0\AndroidManifest.xml:22:5-24:47
 	android:protectionLevel
 		ADDED from [androidx.core:core:1.13.0] C:\Users\91902\.gradle\caches\8.11.1\transforms\a5429f7b20c607b890f08b5283ad4ec0\transformed\core-1.13.0\AndroidManifest.xml:24:9-44
@@ -397,7 +397,7 @@ uses-permission#${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
 ADDED from [androidx.core:core:1.13.0] C:\Users\91902\.gradle\caches\8.11.1\transforms\a5429f7b20c607b890f08b5283ad4ec0\transformed\core-1.13.0\AndroidManifest.xml:26:5-97
 	android:name
 		ADDED from [androidx.core:core:1.13.0] C:\Users\91902\.gradle\caches\8.11.1\transforms\a5429f7b20c607b890f08b5283ad4ec0\transformed\core-1.13.0\AndroidManifest.xml:26:22-94
-uses-permission#app.vercel.credify_u_oelj.twa.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+uses-permission#com.credifyu.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
 ADDED from [androidx.core:core:1.13.0] C:\Users\91902\.gradle\caches\8.11.1\transforms\a5429f7b20c607b890f08b5283ad4ec0\transformed\core-1.13.0\AndroidManifest.xml:26:5-97
 	android:name
 		ADDED from [androidx.core:core:1.13.0] C:\Users\91902\.gradle\caches\8.11.1\transforms\a5429f7b20c607b890f08b5283ad4ec0\transformed\core-1.13.0\AndroidManifest.xml:26:22-94

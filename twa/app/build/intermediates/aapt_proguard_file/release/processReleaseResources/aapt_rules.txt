@@ -2,9 +2,9 @@
 -keep class androidx.core.content.FileProvider { <init>(); }
 -keep class androidx.profileinstaller.ProfileInstallReceiver { <init>(); }
 -keep class androidx.startup.InitializationProvider { <init>(); }
--keep class app.vercel.credify_u_oelj.twa.Application { <init>(); }
--keep class app.vercel.credify_u_oelj.twa.DelegationService { <init>(); }
--keep class app.vercel.credify_u_oelj.twa.LauncherActivity { <init>(); }
+-keep class com.credifyu.app.Application { <init>(); }
+-keep class com.credifyu.app.DelegationService { <init>(); }
+-keep class com.credifyu.app.LauncherActivity { <init>(); }
 -keep class com.google.androidbrowserhelper.trusted.FocusActivity { <init>(); }
 -keep class com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity { <init>(); }
 -keep class com.google.androidbrowserhelper.trusted.NotificationPermissionRequestActivity { <init>(); }

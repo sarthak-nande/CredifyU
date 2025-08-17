@@ -1,5 +1,5 @@
 {
-  "packageId": "app.vercel.credify_u_oelj.twa",
+  "packageId": "com.credifyu.app",
   "host": "credify-u-oelj.vercel.app",
   "name": "CredifyU",
   "launcherName": "CredifyU",
@@ -21,8 +21,8 @@
     "path": "C:\\Users\\91902\\Desktop\\vc-project\\twa\\android.keystore",
     "alias": "android"
   },
-  "appVersionName": "2",
-  "appVersionCode": 2,
+  "appVersionName": "3",
+  "appVersionCode": 3,
   "shortcuts": [
     {
       "name": "Scan QR Code",
@@ -56,5 +56,5 @@
   "protocolHandlers": [],
   "fileHandlers": [],
   "launchHandlerClientMode": "",
-  "appVersion": "2"
+  "appVersion": "3"
 }

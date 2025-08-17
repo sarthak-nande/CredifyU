@@ -4,7 +4,7 @@
     "type": "BUNDLE",
     "kind": "RegularFile"
   },
-  "applicationId": "app.vercel.credify_u_oelj.twa",
+  "applicationId": "com.credifyu.app",
   "variantName": "release",
   "elements": [
     {

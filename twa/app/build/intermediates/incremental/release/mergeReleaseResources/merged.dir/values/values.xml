@@ -347,7 +347,7 @@
     <string name="manage_space_not_supported_toast">This app\'s data is stored in %1$s.</string>
     <string name="no_provider_toast">Please install Chrome Stable 72 or later.</string>
     <string name="orientation" translatable="false">default</string>
-    <string name="providerAuthority" translatable="false">app.vercel.credify_u_oelj.twa.fileprovider</string>
+    <string name="providerAuthority" translatable="false">com.credifyu.app.fileprovider</string>
     <string name="search_menu_title">Search</string>
     <string name="shortcut_name_0" translatable="false">Scan QR Code</string>
     <string name="shortcut_name_1" translatable="false">Dashboard</string>

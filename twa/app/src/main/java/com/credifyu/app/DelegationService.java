@@ -1,4 +1,4 @@
-package app.vercel.credify_u_oelj.twa;
+package com.credifyu.app;
 
 
 

@@ -40,7 +40,7 @@
     <!-- Value from default config. -->
     <string name="orientation" translatable="false">default</string>
     <!-- Value from default config. -->
-    <string name="providerAuthority" translatable="false">app.vercel.credify_u_oelj.twa.fileprovider</string>
+    <string name="providerAuthority" translatable="false">com.credifyu.app.fileprovider</string>
     <!-- Value from default config. -->
     <string name="shortcut_name_0" translatable="false">Scan QR Code</string>
     <!-- Value from default config. -->

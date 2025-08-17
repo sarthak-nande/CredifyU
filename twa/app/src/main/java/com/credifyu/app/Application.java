@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package app.vercel.credify_u_oelj.twa;
+package com.credifyu.app;
 
 
 
