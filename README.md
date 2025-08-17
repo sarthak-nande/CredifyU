@@ -1,6 +1,6 @@
 # CredifyU - Digital Identity Platform
 
-![CredifyU Logo]([./client/public/web-app-manifest-512x512.png])
+<img src="https://credify-u-oelj.vercel.app/web-app-manifest-512x512.png"></img>
 
 **CredifyU** is a secure digital identity platform that enables students, colleges, and third-party authorities to store, issue, and verify academic credentials through QR-based verification.
 
