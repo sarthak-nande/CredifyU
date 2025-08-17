@@ -12,7 +12,7 @@
   "navigationDividerColorDark": "#000000",
   "backgroundColor": "#000000",
   "enableNotifications": true,
-  "startUrl": "https://credify-u-oelj.vercel.app/user/select-role",
+  "startUrl": "/user/select-role",
   "iconUrl": "https://credify-u-oelj.vercel.app/web-app-manifest-512x512.png",
   "maskableIconUrl": "https://credify-u-oelj.vercel.app/web-app-manifest-512x512.png",
   "monochromeIconUrl": "https://credify-u-oelj.vercel.app/web-app-manifest-512x512.png",
@@ -21,8 +21,8 @@
     "path": "C:\\Users\\91902\\Desktop\\vc-project\\twa\\android.keystore",
     "alias": "android"
   },
-  "appVersionName": "3",
-  "appVersionCode": 3,
+  "appVersionName": "4",
+  "appVersionCode": 4,
   "shortcuts": [
     {
       "name": "Scan QR Code",
@@ -56,5 +56,5 @@
   "protocolHandlers": [],
   "fileHandlers": [],
   "launchHandlerClientMode": "",
-  "appVersion": "3"
+  "appVersion": "4"
 }

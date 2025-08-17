@@ -2,7 +2,7 @@
   "name": "CredifyU - QR Student Verification",
   "short_name": "CredifyU",
   "description": "QR-based student verification platform for colleges and universities",
-  "start_url": "/",
+  "start_url": "/user/select-role",
   "display": "standalone",
   "orientation": "portrait",
   "theme_color": "#000000",

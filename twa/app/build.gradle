@@ -23,7 +23,7 @@ plugins {
 def twaManifest = [
     applicationId: 'com.credifyu.app',
     hostName: 'credify-u-oelj.vercel.app', // The domain being opened in the TWA.
-    launchUrl: 'https://credify-u-oelj.vercel.app/user/select-role', // The start path for the TWA. Must be relative to the domain.
+    launchUrl: '/user/select-role', // The start path for the TWA. Must be relative to the domain.
     name: 'CredifyU', // The application name.
     launcherName: 'CredifyU', // The name shown on the Android Launcher.
     themeColor: '#000000', // The color used for the status bar.
@@ -57,8 +57,8 @@ android {
         applicationId "com.credifyu.app"
         minSdkVersion 21
         targetSdkVersion 35
-        versionCode 3
-        versionName "3"
+        versionCode 4
+        versionName "4"
 
         // The name for the application
         resValue "string", "appName", twaManifest.name
