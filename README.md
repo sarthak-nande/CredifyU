@@ -266,12 +266,6 @@ adb shell am start -W -a android.intent.action.VIEW -d "https://credifyu.com/stu
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 📞 Support
-
-- **Email**: support@credifyu.com
-- **GitHub Issues**: [Create Issue](https://github.com/sarthak-nande/CredifyU/issues)
-- **Documentation**: [Wiki](https://github.com/sarthak-nande/CredifyU/wiki)
-
 ## 🏆 Acknowledgments
 
 - React Team for the amazing framework
