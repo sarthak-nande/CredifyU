@@ -321,7 +321,7 @@
         \"relation\": [\"delegate_permission/common.handle_all_urls\"],
         \"target\": {
             \"namespace\": \"web\",
-            \"site\": \"https://credify-u-oelj.vercel.app/\"
+            \"site\": \"https://credify-u-oelj.vercel.app\"
         }
     }]
     
@@ -340,8 +340,8 @@
     <string name="fallback_menu_item_share_link">Share link</string>
     <string name="fullScopeUrl" translatable="false">https://credify-u-oelj.vercel.app/</string>
     <string name="generatorApp" translatable="false">bubblewrap-cli</string>
-    <string name="hostName" translatable="false">credify-u-oelj.vercel.app/</string>
-    <string name="launchUrl" translatable="false">https://credify-u-oelj.vercel.app/https://credify-u-oelj.vercel.app/user/select-role</string>
+    <string name="hostName" translatable="false">credify-u-oelj.vercel.app</string>
+    <string name="launchUrl" translatable="false">https://credify-u-oelj.vercel.apphttps://credify-u-oelj.vercel.app/user/select-role</string>
     <string name="launcherName" translatable="false">CredifyU</string>
     <string name="manage_space_no_data_toast">This app holds no browsing data.</string>
     <string name="manage_space_not_supported_toast">This app\'s data is stored in %1$s.</string>

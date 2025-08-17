@@ -7677,9 +7677,6 @@ app.vercel.credify_u_oelj.twa.R$raw
 app.vercel.credify_u_oelj.twa.R$string
 app.vercel.credify_u_oelj.twa.R$xml
 app.vercel.credify_u_oelj.twa.R
-com.credifyu.app.Application
-com.credifyu.app.DelegationService
-com.credifyu.app.LauncherActivity
 com.google.androidbrowserhelper.BuildConfig
 com.google.androidbrowserhelper.R$drawable:
     private void <init>()

@@ -32,9 +32,9 @@
     <!-- Value from default config. -->
     <string name="generatorApp" translatable="false">bubblewrap-cli</string>
     <!-- Value from default config. -->
-    <string name="hostName" translatable="false">credify-u-oelj.vercel.app/</string>
+    <string name="hostName" translatable="false">credify-u-oelj.vercel.app</string>
     <!-- Value from default config. -->
-    <string name="launchUrl" translatable="false">https://credify-u-oelj.vercel.app/https://credify-u-oelj.vercel.app/user/select-role</string>
+    <string name="launchUrl" translatable="false">https://credify-u-oelj.vercel.apphttps://credify-u-oelj.vercel.app/user/select-role</string>
     <!-- Value from default config. -->
     <string name="launcherName" translatable="false">CredifyU</string>
     <!-- Value from default config. -->

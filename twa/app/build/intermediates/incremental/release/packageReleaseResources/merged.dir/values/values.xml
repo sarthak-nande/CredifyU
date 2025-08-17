@@ -17,7 +17,7 @@
         \"relation\": [\"delegate_permission/common.handle_all_urls\"],
         \"target\": {
             \"namespace\": \"web\",
-            \"site\": \"https://credify-u-oelj.vercel.app/\"
+            \"site\": \"https://credify-u-oelj.vercel.app\"
         }
     }]
     
@@ -25,8 +25,8 @@
     <string name="fallbackType" translatable="false">customtabs</string>
     <string name="fullScopeUrl" translatable="false">https://credify-u-oelj.vercel.app/</string>
     <string name="generatorApp" translatable="false">bubblewrap-cli</string>
-    <string name="hostName" translatable="false">credify-u-oelj.vercel.app/</string>
-    <string name="launchUrl" translatable="false">https://credify-u-oelj.vercel.app/https://credify-u-oelj.vercel.app/user/select-role</string>
+    <string name="hostName" translatable="false">credify-u-oelj.vercel.app</string>
+    <string name="launchUrl" translatable="false">https://credify-u-oelj.vercel.apphttps://credify-u-oelj.vercel.app/user/select-role</string>
     <string name="launcherName" translatable="false">CredifyU</string>
     <string name="orientation" translatable="false">default</string>
     <string name="providerAuthority" translatable="false">app.vercel.credify_u_oelj.twa.fileprovider</string>
